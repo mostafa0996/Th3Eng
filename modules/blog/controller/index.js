@@ -1,4 +1,4 @@
-const { OK, CREATED, INTERNAL_SERVER_ERROR, UNAUTHORIZED, BAD_REQUEST } = require('http-status-codes');
+const { OK, CREATED, INTERNAL_SERVER_ERROR, UNAUTHORIZED, BAD_REQUEST, FORBIDDEN } = require('http-status-codes');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { roles:{

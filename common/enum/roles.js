@@ -1,7 +1,7 @@
 const roles = Object.freeze({
-    ADMIN: 'ADMIN',
-    MODERATOR: 'MODERATOR',
-    CUSTOMER: 'CUSTOMER',
+    ADMIN: 1,
+    MODERATOR: 2,
+    CUSTOMER: 3,
 });
 
 module.exports = {

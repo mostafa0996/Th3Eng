@@ -23,7 +23,6 @@ const UserSchema = new Schema(
       index: true,
       unique: true,
       sparse: true,
-      maxlength: [20, 'Phone number should be less than 20 characters'],
       required: true,
     },
     googleId: {
@@ -53,10 +52,10 @@ const UserSchema = new Schema(
       ],
       required: true,
     },
-    roles: {
-      type: [String],
+    role: {
+      type: Number,
       enum: Object.values(roles),
-      default: [roles.CUSTOMER],
+      default: roles.CUSTOMER,
     },
     password: {
       type: String,
@@ -115,7 +114,7 @@ UserSchema.pre('save', async function (next) {
 // Sign jwt
 UserSchema.methods.generateJWT = function () {
   return jwt.sign(
-    { _id: this._id, roles: this.roles, isPhoneVerified: this.isPhoneVerified },
+    { _id: this._id, role: this.role, isPhoneVerified: this.isPhoneVerified },
     config.jwt.key,
     {
       algorithm: 'HS256',
@@ -128,7 +127,7 @@ UserSchema.methods.toAuthJSON = function () {
   const token = this.generateJWT();
   return {
     _id: this._id,
-    roles: this.roles,
+    role: this.role,
     isPhoneVerified: this.isPhoneVerified,
     token: `Bearer ${token}`,
   };

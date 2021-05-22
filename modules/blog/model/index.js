@@ -1,24 +1,24 @@
-const User = require('../schema');
+const Blog = require('../schema');
 
-const create = async (payload) => User.create(payload);
+const create = async (payload) => Blog.create(payload);
 
 const find = async (selector = {}, options = {}) => {
   const { sort, skip, limit, select } = options;
-  return User.find(selector).select(select).sort(sort).skip(skip).limit(limit);
+  return Blog.find(selector).select(select).sort(sort).skip(skip).limit(limit);
 };
 
 const findById = async (id, options = {}) => {
   const { select } = options;
-  return User.findById(id).select(select);
+  return Blog.findById(id).select(select);
 };
 
 const findOne = async (selector, options = {}) => {
   const { select } = options;
-  return User.findOne(selector).select(select);
+  return Blog.findOne(selector).select(select);
 };
 
 const updateById = async (id, updatePaylod) => {
-  return User.findByIdAndUpdate(id, updatePaylod, {
+  return Blog.findByIdAndUpdate(id, updatePaylod, {
     new: true,
     runValidators: true,
     context: 'query',
@@ -26,28 +26,28 @@ const updateById = async (id, updatePaylod) => {
 };
 
 const updateOne = async (selector, updatePaylod) => {
-  return User.findOneAndUpdate(selector, updatePaylod, {
+  return Blog.findOneAndUpdate(selector, updatePaylod, {
     new: true,
     runValidators: true,
   });
 };
 
 const update = async (selector, updatePaylod) => {
-  return User.updateMany(selector, updatePaylod, {
+  return Blog.updateMany(selector, updatePaylod, {
     new: true,
     runValidators: true,
     multi: true,
   });
 };
 
-const deleteById = async (id) => User.findByIdAndDelete(id);
+const deleteById = async (id) => Blog.findByIdAndDelete(id);
 
-const deleteOne = async (selector) => User.deleteOne(selector);
+const deleteOne = async (selector) => Blog.deleteOne(selector);
 
-const deleteMany = async (selector) => User.deleteMany(selector);
+const deleteMany = async (selector) => Blog.deleteMany(selector);
 
 const count = async (selector = {}) => {
-  return User.countDocuments(selector);
+  return Blog.countDocuments(selector);
 };
 
 module.exports = {

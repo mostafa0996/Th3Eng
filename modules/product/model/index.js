@@ -1,24 +1,24 @@
-const User = require('../schema');
+const Product = require('../schema');
 
-const create = async (payload) => User.create(payload);
+const create = async (payload) => Product.create(payload);
 
 const find = async (selector = {}, options = {}) => {
   const { sort, skip, limit, select } = options;
-  return User.find(selector).select(select).sort(sort).skip(skip).limit(limit);
+  return Product.find(selector).select(select).sort(sort).skip(skip).limit(limit);
 };
 
 const findById = async (id, options = {}) => {
   const { select } = options;
-  return User.findById(id).select(select);
+  return Product.findById(id).select(select);
 };
 
 const findOne = async (selector, options = {}) => {
   const { select } = options;
-  return User.findOne(selector).select(select);
+  return Product.findOne(selector).select(select);
 };
 
 const updateById = async (id, updatePaylod) => {
-  return User.findByIdAndUpdate(id, updatePaylod, {
+  return Product.findByIdAndUpdate(id, updatePaylod, {
     new: true,
     runValidators: true,
     context: 'query',
@@ -26,28 +26,28 @@ const updateById = async (id, updatePaylod) => {
 };
 
 const updateOne = async (selector, updatePaylod) => {
-  return User.findOneAndUpdate(selector, updatePaylod, {
+  return Product.findOneAndUpdate(selector, updatePaylod, {
     new: true,
     runValidators: true,
   });
 };
 
 const update = async (selector, updatePaylod) => {
-  return User.updateMany(selector, updatePaylod, {
+  return Product.updateMany(selector, updatePaylod, {
     new: true,
     runValidators: true,
     multi: true,
   });
 };
 
-const deleteById = async (id) => User.findByIdAndDelete(id);
+const deleteById = async (id) => Product.findByIdAndDelete(id);
 
-const deleteOne = async (selector) => User.deleteOne(selector);
+const deleteOne = async (selector) => Product.deleteOne(selector);
 
-const deleteMany = async (selector) => User.deleteMany(selector);
+const deleteMany = async (selector) => Product.deleteMany(selector);
 
 const count = async (selector = {}) => {
-  return User.countDocuments(selector);
+  return Product.countDocuments(selector);
 };
 
 module.exports = {
