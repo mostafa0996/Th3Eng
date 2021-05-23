@@ -1,12 +1,11 @@
 /* eslint-disable no-unused-vars */
 const { OK } = require('http-status-codes');
 
-const asyncHandler = require('../../../common/middleware/async');
 const User = require('../model/index');
 
 // @desc      User social login
 // @access    Public
-module.exports = asyncHandler(async (req, res, next) => {
+module.exports = async (req, res, next) => {
   // Create User
   const user = await User.findById(req.user_id);
   const data = user.toAuthJSON();
@@ -16,4 +15,4 @@ module.exports = asyncHandler(async (req, res, next) => {
     message: 'User logged in successfully',
     data
   });
-});
+};
