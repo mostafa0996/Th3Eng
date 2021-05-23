@@ -18,6 +18,10 @@ const UserSchema = new Schema(
       type: String,
       required: true,
     },
+    fullName:{
+      type: String,
+      required: false
+    },
     phoneNumber: {
       type: String,
       index: true,
@@ -66,11 +70,6 @@ const UserSchema = new Schema(
       required: false,
       default: false,
     },
-    deleted: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     verificationToken: {
       type: String,
     },
@@ -114,7 +113,7 @@ UserSchema.pre('save', async function (next) {
 // Sign jwt
 UserSchema.methods.generateJWT = function () {
   return jwt.sign(
-    { _id: this._id, role: this.role, isPhoneVerified: this.isPhoneVerified },
+    { _id: this._id, role: this.role, verified: this.verified },
     config.jwt.key,
     {
       algorithm: 'HS256',
@@ -128,7 +127,7 @@ UserSchema.methods.toAuthJSON = function () {
   return {
     _id: this._id,
     role: this.role,
-    isPhoneVerified: this.isPhoneVerified,
+    verified: this.verified,
     token: `Bearer ${token}`,
   };
 };
