@@ -27,7 +27,6 @@ const UserSchema = new Schema(
       index: true,
       unique: true,
       sparse: true,
-      required: true,
     },
     googleId: {
       type: String,
@@ -67,7 +66,6 @@ const UserSchema = new Schema(
     },
     verified: {
       type: Boolean,
-      required: false,
       default: false,
     },
     verificationToken: {
@@ -85,7 +83,6 @@ const UserSchema = new Schema(
     photo: { type: String, default: 'no-photo.jpg' },
     country: {
       type: String,
-      required: true,
     },
   },
   {

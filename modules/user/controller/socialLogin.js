@@ -7,7 +7,7 @@ const User = require('../model/index');
 // @access    Public
 module.exports = async (req, res, next) => {
   // Create User
-  const user = await User.findById(req.user_id);
+  const user = await User.findById(req.user._id);
   const data = user.toAuthJSON();
 
   return res.status(OK).json({

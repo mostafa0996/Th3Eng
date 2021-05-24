@@ -63,7 +63,9 @@ passport.use(
             facebookId,
             fullName: fullName || `${firstName} ${lastName}`,
             email,
-            photo
+            photo,
+            firstName,
+            lastName
           });
         }
         done(null, user);
