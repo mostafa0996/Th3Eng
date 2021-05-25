@@ -65,7 +65,8 @@ passport.use(
             email,
             photo,
             firstName,
-            lastName
+            lastName,
+            verified: true
           });
         }
         done(null, user);
@@ -88,9 +89,10 @@ passport.use(
         const email = profile.emails[0].value || profile._json.email;
         const { id: googleId, displayName: fullName, photos } = profile;
         const {
-          first_name: firstName,
-          last_name: lastName,
-          picture
+          given_name: firstName,
+          family_name: lastName,
+          picture,
+          email_verified: verified
         } = profile._json;
         let photo = picture;
         if (!photo) {
@@ -101,7 +103,11 @@ passport.use(
           user = await User.create({
             googleId,
             fullName: fullName || `${firstName} ${lastName}`,
-            email
+            email,
+            firstName,
+            lastName,
+            verified,
+            photo
           });
         }
         done(null, user);
