@@ -1,3 +1,5 @@
+const { BAD_REQUEST } = require('http-status-codes');
+const ErrorResponse = require('../utils/errorResponse');
 /**
  * @function
  * Middleware to validate the request using joi.
@@ -16,8 +18,7 @@ module.exports = schema => {
       }
     });
     if (validations.length) {
-      return res.status(400)
-      .json({ status: false, message: 'Validation Error', data: validations.join() });
+      return next(new ErrorResponse(validations.join(), BAD_REQUEST));
     }
     next();
   };

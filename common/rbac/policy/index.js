@@ -2,10 +2,10 @@ const {
   roles: { ADMIN, CUSTOMER, MODERATOR },
 } = require('../../enum/roles');
 
-// const superAdminPolicy = require('./superAdminPolicy');
+const adminPolicy = require('./adminPolicy');
 
 const opts = {
-  // [SUPER_ADMIN]: superAdminPolicy,
+  [ADMIN]: adminPolicy,
 };
 
 module.exports = opts;

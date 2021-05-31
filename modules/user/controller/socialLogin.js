@@ -11,7 +11,7 @@ module.exports = async (req, res, next) => {
   const data = user.toAuthJSON();
 
   return res.status(OK).json({
-    status: true,
+    success: true,
     message: 'User logged in successfully',
     data
   });

@@ -2,18 +2,33 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 
+const isAuthorized = require('../../common/middleware/isAuthorized');
 const validateRequest = require('../../common/middleware/validateRequest');
-const { login, socialLogin, socialCallback } = require('./controller/index');
-const { loginSchema } = require('./joi/index');
+const {
+  login,
+  socialLogin,
+  socialCallback,
+  signUp,
+  forgotPassword,
+  resetPassword,
+  verifyUser,
+  getAllUsers,
+} = require('./controller/index');
+
+const {
+  loginSchema,
+  signUpSchema,
+  userVerifySchema,
+  userForgotPasswordSchema,
+  userPasswordResetSchema,
+  getAllUserSchema,
+} = require('./joi/index');
+
+const { USER_GET_ALL_USERS } = require('./helpers/constants');
 
 router.post('/login', validateRequest(loginSchema), login);
 
-router.post('/signup', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Sign up succesfully',
-  });
-});
+router.post('/signup', validateRequest(signUpSchema), signUp);
 
 router.get(
   '/auth/google',
@@ -43,6 +58,27 @@ router.get(
   '/auth/facebook/callback',
   socialCallback('facebook', ['public_profile', 'email']),
   socialLogin
+);
+
+router.put('/verify', validateRequest(userVerifySchema), verifyUser);
+
+router.post(
+  '/forgot-password',
+  validateRequest(userForgotPasswordSchema),
+  forgotPassword
+);
+
+router.post(
+  '/reset-password/:token',
+  validateRequest(userPasswordResetSchema),
+  resetPassword
+);
+
+router.get(
+  '/',
+  isAuthorized(USER_GET_ALL_USERS),
+  validateRequest(getAllUserSchema),
+  getAllUsers
 );
 
 module.exports = router;

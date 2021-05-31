@@ -32,7 +32,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 swaggerDocument.host = config.hostname;
 const options = {
     customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'Voyship Api Docs',
+    customSiteTitle: 'The Eng Api Docs',
 };
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options));
 
