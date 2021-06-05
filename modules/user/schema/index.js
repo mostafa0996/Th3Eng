@@ -18,9 +18,9 @@ const UserSchema = new Schema(
       type: String,
       required: true,
     },
-    fullName:{
+    fullName: {
       type: String,
-      required: false
+      required: false,
     },
     phoneNumber: {
       type: String,
@@ -83,6 +83,10 @@ const UserSchema = new Schema(
     photo: { type: String, default: 'no-photo.jpg' },
     country: {
       type: String,
+    },
+    vip: {
+      type: Boolean,
+      default: false,
     },
   },
   {

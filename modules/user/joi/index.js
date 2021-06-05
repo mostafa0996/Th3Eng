@@ -50,8 +50,42 @@ module.exports = {
   },
 
   getAllUserSchema: {
-    params: Joi.object().keys({
-      role: Joi.string(),
+    query: Joi.object().keys({
+      page: Joi.number(),
+      limit: Joi.number(),
     }),
+  },
+
+  getUserSchema: {
+    params: Joi.object()
+      .keys({
+        id: Joi.string().required(),
+      })
+      .required(),
+  },
+
+  updateUserSchema: {
+    params: Joi.object()
+      .keys({
+        id: Joi.string().required(),
+      })
+      .required(),
+    body: Joi.object().required().keys({
+      firstName: Joi.string().required(),
+      lastName: Joi.string().required(),
+      phoneNumber: Joi.number().required(),
+      country: Joi.string().required(),
+      verified: Joi.string().optional(),
+      vip: Joi.string().optional(),
+      role: Joi.string().optional(),
+    }),
+  },
+
+  deleteUserSchema: {
+    params: Joi.object()
+      .keys({
+        id: Joi.string().required(),
+      })
+      .required(),
   },
 };

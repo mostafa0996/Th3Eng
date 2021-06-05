@@ -13,6 +13,9 @@ const {
   resetPassword,
   verifyUser,
   getAllUsers,
+  getUser,
+  updateUser,
+  deleteUser,
 } = require('./controller/index');
 
 const {
@@ -22,9 +25,17 @@ const {
   userForgotPasswordSchema,
   userPasswordResetSchema,
   getAllUserSchema,
+  getUserSchema,
+  updateUserSchema,
+  deleteUserSchema,
 } = require('./joi/index');
 
-const { USER_GET_ALL_USERS } = require('./helpers/constants');
+const {
+  USER_GET_ALL_USERS,
+  USER_DELETE_USER,
+  USER_GET_USER,
+  USER_UPDATE_USER,
+} = require('./helpers/constants');
 
 router.post('/login', validateRequest(loginSchema), login);
 
@@ -79,6 +90,27 @@ router.get(
   isAuthorized(USER_GET_ALL_USERS),
   validateRequest(getAllUserSchema),
   getAllUsers
+);
+
+router.get(
+  '/:id',
+  isAuthorized(USER_GET_USER),
+  validateRequest(getUserSchema),
+  getUser
+);
+
+router.put(
+  '/:id',
+  isAuthorized(USER_UPDATE_USER),
+  validateRequest(updateUserSchema),
+  updateUser
+);
+
+router.delete(
+  '/:id',
+  isAuthorized(USER_DELETE_USER),
+  validateRequest(deleteUserSchema),
+  deleteUser
 );
 
 module.exports = router;

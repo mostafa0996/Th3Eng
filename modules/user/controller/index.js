@@ -69,7 +69,7 @@ const signUp = async (req, res, next) => {
       password,
       country,
     };
-    role ? payload.role = role : null;
+    role ? (payload.role = role) : null;
     // Create User
     const user = await User.create(payload);
 
@@ -221,6 +221,69 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
+const getUser = async (req, res, next) => {
+  try {
+    const selector = req.param.id;
+    const user = await User.find(selector, options);
+    return res.status(OK).json({
+      success: true,
+      message: 'User retrieved successfully',
+      data: user,
+    });
+  } catch (error) {
+    logger.error('Error get user', error.messgae);
+    next(new ErrorResponse(err.message, err.status || INTERNAL_SERVER_ERROR));
+  }
+};
+
+const updateUser = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const loggedInUser = req.user._id;
+    const payload = req.body;
+    const updatePayload = { _id: userId };
+    if (userId == loggedInUser) {
+      updatePayload.firstName = payload.firstName;
+      updatePayload.lastName = payload.lastName;
+      updatePayload.phoneNumber = payload.phoneNumber;
+      updatePayload.fullName = `${payload.firstName} ${payload.lastName}`;
+    } else {
+      updatePayload.firstName = payload.firstName;
+      updatePayload.lastName = payload.lastName;
+      updatePayload.fullName = `${payload.firstName} ${payload.lastName}`;
+      updatePayload.phoneNumber = payload.phoneNumber;
+      updatePayload.country = payload.country;
+      updatePayload.verified = payload.verified;
+      updatePayload.role = payload.role;
+      updatePayload.vip = payload.vip;
+    }
+    const user = await User.updateById(userId, updatePayload);
+    return res.status(OK).json({
+      success: true,
+      message: 'Users updated successfully',
+      data: user,
+    });
+  } catch (error) {
+    logger.error('Error update user ', error.messgae);
+    next(new ErrorResponse(err.message, err.status || INTERNAL_SERVER_ERROR));
+  }
+};
+
+const deleteUser = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.deleteById(userId);
+    return res.status(OK).json({
+      success: true,
+      message: 'User deleted successfully',
+      data: user,
+    });
+  } catch (error) {
+    logger.error('Error delete user ', error.messgae);
+    next(new ErrorResponse(err.message, err.status || INTERNAL_SERVER_ERROR));
+  }
+};
+
 module.exports = {
   login,
   signUp,
@@ -230,4 +293,7 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getAllUsers,
+  getUser,
+  updateUser,
+  deleteUser,
 };
