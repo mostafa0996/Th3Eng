@@ -225,6 +225,9 @@ const getUser = async (req, res, next) => {
   try {
     const selector = req.param.id;
     const user = await User.find(selector, options);
+    if (!user) {
+      return next(new ErrorResponse('Blog not exist', NOT_FOUND));
+    }
     return res.status(OK).json({
       success: true,
       message: 'User retrieved successfully',

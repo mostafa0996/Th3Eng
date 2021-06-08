@@ -2,6 +2,7 @@ const config = require('../config/configuration');
 const errorHandler = require('../middleware/errorHandler');
 // Route files
 const userRoutes = require('../../modules/user');
+const blogRoutes = require('../../modules/blog');
 
 /**
  * @function
@@ -11,6 +12,7 @@ const userRoutes = require('../../modules/user');
  */
 module.exports = (app) => {
   app.use(`${config.baseUrl}/users`, userRoutes);
+  app.use(`${config.baseUrl}/blogs`, blogRoutes);
 
   // Central error handler
   app.use(errorHandler);

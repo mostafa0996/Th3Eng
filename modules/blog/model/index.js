@@ -2,27 +2,44 @@ const Blog = require('../schema');
 
 const create = async (payload) => Blog.create(payload);
 
-const find = async (selector = {}, options = {}) => {
+const find = async (selector = {}, options = {}, populateCollection = '') => {
   const { sort, skip, limit, select } = options;
-  return Blog.find(selector).select(select).sort(sort).skip(skip).limit(limit);
+  return populateCollection.length > 0
+    ? Blog.find(selector)
+        .select(select)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .populate(populateCollection)
+    : Blog.find(selector).select(select).sort(sort).skip(skip).limit(limit);
 };
 
-const findById = async (id, options = {}) => {
+const findById = async (id, options = {}, populateCollection = '') => {
   const { select } = options;
-  return Blog.findById(id).select(select);
+  return populateCollection.length > 0
+    ? Blog.findById(id).select(select).populate(populateCollection)
+    : Blog.findById(id).select(select);
 };
 
-const findOne = async (selector, options = {}) => {
+const findOne = async (selector, options = {}, populateCollection = '') => {
   const { select } = options;
-  return Blog.findOne(selector).select(select);
+  return populateCollection.length > 0
+    ? Blog.findOne(selector).select(select).populate(populateCollection)
+    : Blog.findOne(selector).select(select);
 };
 
-const updateById = async (id, updatePaylod) => {
-  return Blog.findByIdAndUpdate(id, updatePaylod, {
-    new: true,
-    runValidators: true,
-    context: 'query',
-  });
+const updateById = async (id, updatePaylod, populateCollection = '') => {
+  return populateCollection.length > 0
+    ? Blog.findByIdAndUpdate(id, updatePaylod, {
+        new: true,
+        runValidators: true,
+        context: 'query',
+      }).populate(populateCollection)
+    : Blog.findByIdAndUpdate(id, updatePaylod, {
+        new: true,
+        runValidators: true,
+        context: 'query',
+      });
 };
 
 const updateOne = async (selector, updatePaylod) => {
