@@ -52,7 +52,7 @@ const login = async (req, res, next) => {
     });
   } catch (error) {
     logger.error('Error while login ', error.message);
-    next(new ErrorResponse(err.message, err.status || INTERNAL_SERVER_ERROR));
+    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -97,7 +97,7 @@ const signUp = async (req, res, next) => {
       .json({ success: true, message: 'User Created', data: user });
   } catch (error) {
     logger.error('Error while signup ', error.message);
-    next(new ErrorResponse(err.message, err.status || INTERNAL_SERVER_ERROR));
+    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -125,7 +125,7 @@ const verifyUser = async (req, res, next) => {
     });
   } catch (error) {
     logger.error('Error while verifing user ', error.message);
-    next(new ErrorResponse(err.message, err.status || INTERNAL_SERVER_ERROR));
+    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -161,7 +161,7 @@ const forgotPassword = async (req, res, next) => {
     });
   } catch (error) {
     logger.error('Error creating reset password token ', error.message);
-    next(new ErrorResponse(err.message, err.status || INTERNAL_SERVER_ERROR));
+    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -193,7 +193,7 @@ const resetPassword = async (req, res, next) => {
     });
   } catch (error) {
     logger.error('Error resetting user password ', error.message);
-    next(new ErrorResponse(err.message, err.status || INTERNAL_SERVER_ERROR));
+    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -216,8 +216,8 @@ const getAllUsers = async (req, res, next) => {
       data: users,
     });
   } catch (error) {
-    logger.error('Error get all users ', error.messgae);
-    next(new ErrorResponse(err.message, err.status || INTERNAL_SERVER_ERROR));
+    logger.error('Error get all users ', error.message);
+    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -234,8 +234,8 @@ const getUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    logger.error('Error get user', error.messgae);
-    next(new ErrorResponse(err.message, err.status || INTERNAL_SERVER_ERROR));
+    logger.error('Error get user', error.message);
+    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -267,8 +267,8 @@ const updateUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    logger.error('Error update user ', error.messgae);
-    next(new ErrorResponse(err.message, err.status || INTERNAL_SERVER_ERROR));
+    logger.error('Error update user ', error.message);
+    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -282,8 +282,8 @@ const deleteUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    logger.error('Error delete user ', error.messgae);
-    next(new ErrorResponse(err.message, err.status || INTERNAL_SERVER_ERROR));
+    logger.error('Error delete user ', error.message);
+    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 

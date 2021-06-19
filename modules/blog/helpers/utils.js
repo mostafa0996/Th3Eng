@@ -2,16 +2,16 @@ const _ = require('lodash');
 const Category = require('../../../common/schema/Category');
 
 class Utils {
-  static handleCategories = async (existedCategories, payload) => {
+  static handleCategories = async (existedCategories, categories) => {
     //get all categoriesName
     const existedCategoriesNames = existedCategories.map((ele) => ele.name);
 
     //convert categories to lowercase
-    payload.categories = payload.categories.map((cat) => cat.toLowerCase());
+    categories = categories.map((cat) => cat.toLowerCase());
 
     // get requested categories ids
     let payloadCategoriesIds = [];
-    for (const payloadCategoryName of payload.categories) {
+    for (const payloadCategoryName of categories) {
       for (const existedCategory of existedCategories) {
         if (existedCategory.name == payloadCategoryName) {
           payloadCategoriesIds.push(existedCategory._id);
@@ -21,7 +21,7 @@ class Utils {
 
     // find not existed categories to create them
     let notExistedCategories = _.difference(
-      payload.categories,
+      categories,
       existedCategoriesNames
     );
     notExistedCategories = notExistedCategories.map((ele) => ({ name: ele }));
@@ -30,10 +30,10 @@ class Utils {
       createdCategories = await Category.insertMany(notExistedCategories);
     }
     const createdCategoriesIds = createdCategories.map((ele) => ele._id);
-    payload.categories = createdCategoriesIds.length
+    categories = createdCategoriesIds.length
       ? [...payloadCategoriesIds, ...createdCategoriesIds]
       : [...payloadCategoriesIds];
-    return payload;
+    return categories;
   };
 }
 

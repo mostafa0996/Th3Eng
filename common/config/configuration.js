@@ -19,6 +19,7 @@ const config = {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      fubsBucketName: process.env.BUCKET
     },
     sendgrid: {
       apikey: process.env.SENDGRID_API_KEY,

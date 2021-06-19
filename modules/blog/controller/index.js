@@ -8,6 +8,7 @@ const {
   FORBIDDEN,
   NOT_FOUND,
 } = require('http-status-codes');
+const path = require('path');
 const {
   roles: { ADMIN, CUSTOMER, MODERATOR },
 } = require('../../../common/enum/roles');
@@ -18,12 +19,32 @@ const ErrorResponse = require('../../../common/utils/errorResponse');
 const Utils = require('../helpers/utils');
 const Blog = require('../model/index');
 const Category = require('../../../common/schema/Category');
-
+const { uploadMultipleFiles, uploadSingleFile } = require('../../../common/services/googleBucket/uploadFiles');
 const createBlog = async (req, res, next) => {
   try {
+    const body = JSON.parse(req.body.payload);
+    const payload = {
+      categories: body.categories,
+      screenshots: [],
+      photo: 'null',
+      description: body.description,
+      title: body.title,
+    };
     const existedCategories = await Category.find({});
-    const payload = await Utils.handleCategories(existedCategories, req.body);
-
+    payload.categories = await Utils.handleCategories(
+      existedCategories,
+      payload.categories
+    );
+    if (req.files) {
+      if (req.files.screenshots) {
+        const { screenshots } = req.files;
+        payload.screenshots = await uploadMultipleFiles(screenshots, 'blog')
+      }
+      if (req.files.photo) {
+        const { photo } = req.files;
+        payload.photo = await uploadSingleFile(photo, 'blog')
+      }
+    }
     const createdBlog = await Blog.create(payload);
     return res.status(CREATED).json({
       success: true,
@@ -31,7 +52,7 @@ const createBlog = async (req, res, next) => {
       data: createdBlog,
     });
   } catch (error) {
-    logger.error('Error create blog ', error.messgae);
+    logger.error('Error create blog: ', error.message);
     next(
       new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
     );
@@ -56,7 +77,7 @@ const getAllBlogs = async (req, res, next) => {
       data: blogs,
     });
   } catch (error) {
-    logger.error('Error retrieve blogs ', error.messgae);
+    logger.error('Error retrieve blogs ', error.message);
     next(
       new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
     );
@@ -77,7 +98,7 @@ const getBlog = async (req, res, next) => {
       data: blog,
     });
   } catch (error) {
-    logger.error('Error get blog ', error.messgae);
+    logger.error('Error get blog ', error.message);
     next(
       new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
     );
@@ -104,7 +125,7 @@ const updateBlog = async (req, res, next) => {
       data: result,
     });
   } catch (error) {
-    logger.error('Error update blog ', error.messgae);
+    logger.error('Error update blog ', error.message);
     next(
       new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
     );
@@ -125,7 +146,7 @@ const deleteBlog = async (req, res, next) => {
       data: result,
     });
   } catch (error) {
-    logger.error('Error delete blog ', error.messgae);
+    logger.error('Error delete blog ', error.message);
     next(
       new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
     );

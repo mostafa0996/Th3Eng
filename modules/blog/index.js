@@ -1,8 +1,9 @@
 const express = require('express');
-const router = express.Router();
 
 const isAuthorized = require('../../common/middleware/isAuthorized');
 const validateRequest = require('../../common/middleware/validateRequest');
+
+const router = express.Router();
 
 const {
   getAllBlogs,
@@ -38,25 +39,25 @@ router.get(
 router.post(
   '/',
   //   isAuthorized(BLOG_CREATE_BLOG),
-  validateRequest(createBlogSchema),
+  // validateRequest(createBlogSchema),
   createBlog
 );
 
 router.get(
   '/:id',
-//   isAuthorized(BLOG_GET_BLOG),
+  //   isAuthorized(BLOG_GET_BLOG),
   validateRequest(getBlogSchema),
   getBlog
 );
 router.put(
   '/:id',
-//   isAuthorized(BLOG_UPDATE_BLOG),
+  //   isAuthorized(BLOG_UPDATE_BLOG),
   validateRequest(updateBlogSchema),
   updateBlog
 );
 router.delete(
   '/:id',
-//   isAuthorized(BLOG_DELETE_BLOG),
+  //   isAuthorized(BLOG_DELETE_BLOG),
   validateRequest(deleteBlogSchema),
   deleteBlog
 );
