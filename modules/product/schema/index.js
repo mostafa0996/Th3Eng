@@ -3,7 +3,11 @@ const { Schema } = mongoose;
 const { PRODUCT_TYPE } = require('../helpers/constants');
 const ProductSchema = new Schema(
   {
-    title: {
+    name: {
+      type: String,
+      required: true,
+    },
+    secondName: {
       type: String,
       required: true,
     },
@@ -12,14 +16,6 @@ const ProductSchema = new Schema(
       required: true,
     },
     version: {
-      type: String,
-      required: true,
-    },
-    os: {
-      type: String,
-      required: false,
-    },
-    image: {
       type: String,
       required: true,
     },
@@ -51,17 +47,16 @@ const ProductSchema = new Schema(
     },
     visibility: {
       type: Boolean,
-      required: true,
       default: true
     },
   },
   {
-    collection: 'blogs',
+    collection: 'products',
     timestamps: true,
     versionKey: false,
   }
 );
 
-const Product = mongoose.model('blogs', ProductSchema);
+const Product = mongoose.model('products', ProductSchema);
 
 module.exports = Product;

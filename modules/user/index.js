@@ -16,6 +16,7 @@ const {
   getUser,
   updateUser,
   deleteUser,
+  exportUsers
 } = require('./controller/index');
 
 const {
@@ -87,28 +88,34 @@ router.post(
 
 router.get(
   '/',
-  isAuthorized(USER_GET_ALL_USERS),
+  // isAuthorized(USER_GET_ALL_USERS),
   validateRequest(getAllUserSchema),
   getAllUsers
 );
 
 router.get(
+  '/export',
+  // isAuthorized(USER_GET_ALL_USERS),
+  exportUsers
+);
+
+router.get(
   '/:id',
-  isAuthorized(USER_GET_USER),
+  // isAuthorized(USER_GET_USER),
   validateRequest(getUserSchema),
   getUser
 );
 
 router.put(
   '/:id',
-  isAuthorized(USER_UPDATE_USER),
+  // isAuthorized(USER_UPDATE_USER),
   validateRequest(updateUserSchema),
   updateUser
 );
 
 router.delete(
   '/:id',
-  isAuthorized(USER_DELETE_USER),
+  // isAuthorized(USER_DELETE_USER),
   validateRequest(deleteUserSchema),
   deleteUser
 );

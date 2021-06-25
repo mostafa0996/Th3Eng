@@ -21,8 +21,9 @@ const Tag = require('../../../common/schema/Tag');
 
 const createProduct = async (req, res, next) => {
   try {
+    const payload = req.body;
     const existedTags = await Tag.find({});
-    const payload = await Utils.handleTags(existedTags, req.body);
+    const payload = await Utils.handleTags(existedTags, payload.tags);
 
     const createdProduct = await Product.create(payload);
     return res.status(CREATED).json({
@@ -93,11 +94,12 @@ const updateProduct = async (req, res, next) => {
       return next(new ErrorResponse('Product not exist', NOT_FOUND));
     }
     const existedTags = await Tag.find({});
-    const updatePayload = await Utils.handleTags(
-      existedTags,
-      req.body
+    const updatePayload = await Utils.handleTags(existedTags, req.body);
+    const result = await Product.updateById(
+      id,
+      updatePayload,
+      populateCollection
     );
-    const result = await Product.updateById(id, updatePayload, populateCollection);
     return res.status(OK).json({
       success: true,
       message: 'Product updated successfully',

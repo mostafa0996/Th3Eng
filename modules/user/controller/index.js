@@ -8,6 +8,7 @@ const {
 } = require('http-status-codes');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const moment = require('moment')
 const {
   roles: { ADMIN, CUSTOMER, MODERATOR },
 } = require('../../../common/enum/roles');
@@ -18,7 +19,7 @@ const { PAGE_LIMIT } = require('../../../common/constants');
 const User = require('../model/index');
 const ErrorResponse = require('../../../common/utils/errorResponse');
 const { formatSearchOptions } = require('../helpers/utils');
-
+const { exportUsersService } = require('../services/index');
 // auth controllers
 const socialCallback = require('./socialCallback');
 const socialLogin = require('./socialLogin');
@@ -34,7 +35,7 @@ const login = async (req, res, next) => {
           NOT_FOUND
         )
       );
-    }
+    };
     const isMatch = await user.validatePassword(password);
     if (!isMatch) {
       return next(
@@ -51,8 +52,11 @@ const login = async (req, res, next) => {
       data: { user, token: data.token },
     });
   } catch (error) {
+    console.error(error)
     logger.error('Error while login ', error.message);
-    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
+    next(
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+    );
   }
 };
 
@@ -97,7 +101,9 @@ const signUp = async (req, res, next) => {
       .json({ success: true, message: 'User Created', data: user });
   } catch (error) {
     logger.error('Error while signup ', error.message);
-    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
+    next(
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+    );
   }
 };
 
@@ -125,7 +131,9 @@ const verifyUser = async (req, res, next) => {
     });
   } catch (error) {
     logger.error('Error while verifing user ', error.message);
-    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
+    next(
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+    );
   }
 };
 
@@ -161,7 +169,9 @@ const forgotPassword = async (req, res, next) => {
     });
   } catch (error) {
     logger.error('Error creating reset password token ', error.message);
-    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
+    next(
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+    );
   }
 };
 
@@ -193,20 +203,23 @@ const resetPassword = async (req, res, next) => {
     });
   } catch (error) {
     logger.error('Error resetting user password ', error.message);
-    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
+    next(
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+    );
   }
 };
 
 const getAllUsers = async (req, res, next) => {
   try {
     const page = req.query.page || 1;
-    const limit = req.query.limit || PAGE_LIMIT;
+    const limit = Number(req.query.limit) || PAGE_LIMIT;
     delete req.query.page;
     const options = {
       skip: limit * page - limit,
       limit: limit,
     };
     const query = formatSearchOptions(req.query);
+    console.log(query, options);
     const count = await User.count(query);
     const users = await User.find(query, options);
     return res.status(OK).json({
@@ -217,7 +230,9 @@ const getAllUsers = async (req, res, next) => {
     });
   } catch (error) {
     logger.error('Error get all users ', error.message);
-    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
+    next(
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+    );
   }
 };
 
@@ -235,7 +250,9 @@ const getUser = async (req, res, next) => {
     });
   } catch (error) {
     logger.error('Error get user', error.message);
-    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
+    next(
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+    );
   }
 };
 
@@ -268,7 +285,9 @@ const updateUser = async (req, res, next) => {
     });
   } catch (error) {
     logger.error('Error update user ', error.message);
-    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
+    next(
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+    );
   }
 };
 
@@ -283,7 +302,30 @@ const deleteUser = async (req, res, next) => {
     });
   } catch (error) {
     logger.error('Error delete user ', error.message);
-    next(new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR));
+    next(
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+    );
+  }
+};
+
+const exportUsers = async (req, res, next) => {
+  try {
+    const result = await exportUsersService();
+    const fileName = moment(new Date()).format('DD-MM-YYYY');
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `${'attachment; filename=Users_'}${fileName}.xlsx"`
+    );
+    return res.status(OK).send(result);
+  } catch (error) {
+    logger.error('Error delete user ', error.message);
+    next(
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+    );
   }
 };
 
@@ -299,4 +341,5 @@ module.exports = {
   getUser,
   updateUser,
   deleteUser,
+  exportUsers
 };

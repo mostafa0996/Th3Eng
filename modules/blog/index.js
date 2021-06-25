@@ -39,7 +39,7 @@ router.get(
 router.post(
   '/',
   //   isAuthorized(BLOG_CREATE_BLOG),
-  // validateRequest(createBlogSchema),
+  validateRequest(createBlogSchema),
   createBlog
 );
 

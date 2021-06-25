@@ -135,7 +135,9 @@ UserSchema.methods.toAuthJSON = function () {
 
 // Match user hashed password with entered password
 UserSchema.methods.validatePassword = async function (enteredPassword) {
+  console.log(enteredPassword, this.password);
   const isMatch = await bcrypt.compare(enteredPassword, this.password);
+  console.log(isMatch);
   return isMatch;
 };
 

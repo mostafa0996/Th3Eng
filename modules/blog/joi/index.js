@@ -13,10 +13,11 @@ module.exports = {
     body: Joi.object()
       .required()
       .keys({
-        title: Joi.string(),
-        description: Joi.string(),
-        screenshots: Joi.array().items(Joi.string()),
-        categories: Joi.array().items(Joi.string()),
+        title: Joi.string().required(),
+        description: Joi.string().required(),
+        images: Joi.array().items(Joi.string()).required(),
+        categories: Joi.array().items(Joi.string()).required(),
+        cover: Joi.string().required(),
       }),
   },
 
@@ -37,10 +38,11 @@ module.exports = {
     body: Joi.object()
       .required()
       .keys({
-        title: Joi.string(),
-        description: Joi.string(),
-        screenshots: Joi.array().items(Joi.string()),
-        categories: Joi.array().items(Joi.string()),
+        title: Joi.string().required(),
+        description: Joi.string().required(),
+        images: Joi.array().items(Joi.string()).required(),
+        categories: Joi.array().items(Joi.string()).required(),
+        cover: Joi.string().required(),
       }),
   },
 

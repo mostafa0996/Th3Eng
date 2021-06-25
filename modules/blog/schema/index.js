@@ -11,11 +11,11 @@ const BlogSchema = new Schema(
       type: String,
       required: true,
     },
-    photo:{
+    cover:{
       type: String,
       required: true,
     },
-    screenshots: {
+    images: {
       type: [String],
       required: true,
     },
@@ -25,7 +25,6 @@ const BlogSchema = new Schema(
     },
     visibility: {
       type: Boolean,
-      required: true,
       default: true
     },
   },

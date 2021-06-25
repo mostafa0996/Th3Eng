@@ -13,7 +13,7 @@ module.exports = schema => {
       if (schema[key]) {
         const validation = schema[key].validate(req[key]);
         if (validation.error) {
-          validations.push(validation.error.details[0].message);
+          validations.push(validation.error.details[0].message.split('\"').join(""));
         }
       }
     });

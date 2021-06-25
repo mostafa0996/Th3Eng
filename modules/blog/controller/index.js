@@ -13,38 +13,20 @@ const {
   roles: { ADMIN, CUSTOMER, MODERATOR },
 } = require('../../../common/enum/roles');
 const logger = require('../../../common/config/logger');
-const config = require('../../../common/config/configuration');
 const { PAGE_LIMIT } = require('../../../common/constants');
 const ErrorResponse = require('../../../common/utils/errorResponse');
 const Utils = require('../helpers/utils');
 const Blog = require('../model/index');
 const Category = require('../../../common/schema/Category');
-const { uploadMultipleFiles, uploadSingleFile } = require('../../../common/services/googleBucket/uploadFiles');
+
 const createBlog = async (req, res, next) => {
   try {
-    const body = JSON.parse(req.body.payload);
-    const payload = {
-      categories: body.categories,
-      screenshots: [],
-      photo: 'null',
-      description: body.description,
-      title: body.title,
-    };
+    const payload = req.body;
     const existedCategories = await Category.find({});
     payload.categories = await Utils.handleCategories(
       existedCategories,
       payload.categories
     );
-    if (req.files) {
-      if (req.files.screenshots) {
-        const { screenshots } = req.files;
-        payload.screenshots = await uploadMultipleFiles(screenshots, 'blog')
-      }
-      if (req.files.photo) {
-        const { photo } = req.files;
-        payload.photo = await uploadSingleFile(photo, 'blog')
-      }
-    }
     const createdBlog = await Blog.create(payload);
     return res.status(CREATED).json({
       success: true,
@@ -116,7 +98,7 @@ const updateBlog = async (req, res, next) => {
     const existedCategories = await Category.find({});
     const updatePayload = await Utils.handleCategories(
       existedCategories,
-      req.body
+      req.body.categories
     );
     const result = await Blog.updateById(id, updatePayload, populateCollection);
     return res.status(OK).json({

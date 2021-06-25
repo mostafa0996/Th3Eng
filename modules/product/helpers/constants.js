@@ -1,8 +1,15 @@
 module.exports = Object.freeze({
-    BLOG_GET_ALL_BLOGS: 'blog:getAllBlogs',
-    BLOG_CREATE_BLOG: 'blog:createBlog',
-    BLOG_GET_BLOG: 'blog:getBlog',
-    BLOG_UPDATE_BLOG: 'blog:updateBlog',
-    BLOG_DELETE_BLOG: 'blog:deleteBlog',
-  });
-  
+    PRODUCT_GET_ALL_PRODUCTS: 'product:getAllProducts',
+    PRODUCT_CREATE_PRODUCT: 'product:createProduct',
+    PRODUCT_GET_PRODUCT: 'product:getProduct',
+    PRODUCT_UPDATE_PRODUCT: 'product:updateProduct',
+    PRODUCT_DELETE_PRODUCT: 'product:deleteProduct',
+});
+
+const PRODUCT_TYPE = {
+  FREE: 0,
+  PAID: 1,
+}
+module.exports = {
+  PRODUCT_TYPE
+}

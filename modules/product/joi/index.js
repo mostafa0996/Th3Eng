@@ -1,5 +1,6 @@
 const Joi = require('@hapi/joi');
 const { objectId } = require('../../../common/validation/custom.validations');
+const { PRODUCT_TYPE } = require('../helpers/constants');
 
 module.exports = {
   getAllProductsSchema: {
@@ -13,10 +14,12 @@ module.exports = {
     body: Joi.object()
       .required()
       .keys({
-        title: Joi.string(),
-        description: Joi.string(),
-        screenshots: Joi.array().items(Joi.string()),
-        categories: Joi.array().items(Joi.string()),
+        name: Joi.string().required(),
+        secondName: Joi.string().required(),
+        description: Joi.string().required(),
+        screenshots: Joi.array().items(Joi.string()).required(),
+        tags: Joi.array().items(Joi.string()).required(),
+        type: Joi.number().valid(...Object.values(PRODUCT_TYPE)).required()
       }),
   },
 
@@ -37,10 +40,12 @@ module.exports = {
     body: Joi.object()
       .required()
       .keys({
-        title: Joi.string(),
-        description: Joi.string(),
-        screenshots: Joi.array().items(Joi.string()),
-        categories: Joi.array().items(Joi.string()),
+        name: Joi.string().required(),
+        secondName: Joi.string().required(),
+        description: Joi.string().required(),
+        screenshots: Joi.array().items(Joi.string()).required(),
+        tags: Joi.array().items(Joi.string()).required(),
+        type: Joi.number().valid(...Object.values(PRODUCT_TYPE)).required()
       }),
   },
 
