@@ -57,6 +57,7 @@ const getAllBlogs = async (req, res, next) => {
       success: true,
       message: 'Blogs loaded successfully',
       count,
+      totalPages: Math.ceil(count/limit),
       data: blogs,
     });
   } catch (error) {

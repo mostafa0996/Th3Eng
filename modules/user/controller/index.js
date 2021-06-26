@@ -226,6 +226,7 @@ const getAllUsers = async (req, res, next) => {
       success: true,
       message: 'Users loaded successfully',
       count,
+      totalPages: Math.ceil(count/limit),
       data: users,
     });
   } catch (error) {
