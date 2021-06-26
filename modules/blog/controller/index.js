@@ -47,11 +47,12 @@ const getAllBlogs = async (req, res, next) => {
     const limit = Number(req.query.limit) || PAGE_LIMIT;
     const page = Number(req.query.page) || 1;
     const options = {
-      skip: limit * page - limit,
+      skip: (limit * page) - limit,
       limit: limit,
     };
-    const count = await Blog.count(req.query);
-    const blogs = await Blog.find(req.query, options, populateCollection);
+    console.log(options);
+    const count = await Blog.count();
+    const blogs = await Blog.find({}, options, populateCollection);
     return res.status(OK).json({
       success: true,
       message: 'Blogs loaded successfully',

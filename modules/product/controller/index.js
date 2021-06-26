@@ -48,8 +48,8 @@ const getAllProducts = async (req, res, next) => {
       skip: limit * page - limit,
       limit: limit,
     };
-    const count = await Product.count(req.query);
-    const products = await Product.find(req.query, options, populateCollection);
+    const count = await Product.count({});
+    const products = await Product.find({}, options, populateCollection);
     return res.status(OK).json({
       success: true,
       message: 'Products loaded successfully',
