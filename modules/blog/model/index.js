@@ -3,6 +3,7 @@ const Blog = require('../schema');
 const create = async (payload) => Blog.create(payload);
 
 const find = async (selector = {}, options = {}, populateCollection = '') => {
+  selector.visibility = true;
   const { sort, skip, limit, select } = options;
   return populateCollection.length > 0
     ? Blog.find(selector)

@@ -2,27 +2,45 @@ const Product = require('../schema');
 
 const create = async (payload) => Product.create(payload);
 
-const find = async (selector = {}, options = {}) => {
+const find = async (selector = {}, options = {}, populateCollection = '') => {
+  selector.visibility = true;
   const { sort, skip, limit, select } = options;
-  return Product.find(selector).select(select).sort(sort).skip(skip).limit(limit);
+  return populateCollection.length > 0
+    ? Product.find(selector)
+        .select(select)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .populate(populateCollection)
+    : Product.find(selector).select(select).sort(sort).skip(skip).limit(limit);
 };
 
-const findById = async (id, options = {}) => {
+const findById = async (id, options = {}, populateCollection = '') => {
   const { select } = options;
-  return Product.findById(id).select(select);
+  return populateCollection.length > 0
+    ? Product.findById(id).select(select).populate(populateCollection)
+    : Product.findById(id).select(select);
 };
 
-const findOne = async (selector, options = {}) => {
+const findOne = async (selector, options = {}, populateCollection = '') => {
   const { select } = options;
-  return Product.findOne(selector).select(select);
+  return populateCollection.length > 0
+    ? Product.findOne(selector).select(select).populate(populateCollection)
+    : Product.findOne(selector).select(select);
 };
 
-const updateById = async (id, updatePaylod) => {
-  return Product.findByIdAndUpdate(id, updatePaylod, {
-    new: true,
-    runValidators: true,
-    context: 'query',
-  });
+const updateById = async (id, updatePaylod, populateCollection = '') => {
+  return populateCollection.length > 0
+    ? Product.findByIdAndUpdate(id, updatePaylod, {
+        new: true,
+        runValidators: true,
+        context: 'query',
+      }).populate(populateCollection)
+    : Product.findByIdAndUpdate(id, updatePaylod, {
+        new: true,
+        runValidators: true,
+        context: 'query',
+      });
 };
 
 const updateOne = async (selector, updatePaylod) => {

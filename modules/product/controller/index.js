@@ -23,7 +23,7 @@ const createProduct = async (req, res, next) => {
   try {
     const payload = req.body;
     const existedTags = await Tag.find({});
-    const payload = await Utils.handleTags(existedTags, payload.tags);
+    payload.tags = await Utils.handleTags(existedTags, payload.tags);
 
     const createdProduct = await Product.create(payload);
     return res.status(CREATED).json({
@@ -50,12 +50,16 @@ const getAllProducts = async (req, res, next) => {
     };
     const searchQuery = Utils.formatSearchQuery(req.query.search);
     const count = await Product.count(searchQuery);
-    const products = await Product.find(searchQuery, options, populateCollection);
+    const products = await Product.find(
+      searchQuery,
+      options,
+      populateCollection
+    );
     return res.status(OK).json({
       success: true,
       message: 'Products loaded successfully',
       count,
-      totalPages: Math.ceil(count/limit),
+      totalPages: Math.ceil(count / limit),
       data: products,
     });
   } catch (error) {
@@ -69,15 +73,40 @@ const getAllProducts = async (req, res, next) => {
 const getProduct = async (req, res, next) => {
   const { id } = req.params;
   const populateCollection = 'tags';
+  const result = {};
   try {
     const product = await Product.findById(id, {}, populateCollection);
     if (!product) {
       return next(new ErrorResponse('Product not exist', NOT_FOUND));
     }
+    const tags = product.tags.map((tag) => tag._id) || null;
+    if (tags.length > 0) {
+      result.relatedProducts = await Product.find(
+        {
+          $and: [
+            {
+              tags: { $in: tags },
+            },
+            { _id: { $ne: product._id } },
+          ],
+        },
+        {
+          select: {
+            name: 1,
+            secondName: 1,
+            description: 1,
+            type: 1,
+            price: 1,
+            version: 1,
+          },
+        }
+      );
+    }
+    result.product = product;
     return res.status(OK).json({
       success: true,
       message: 'Product loaded successfully',
-      data: product,
+      data: result,
     });
   } catch (error) {
     logger.error('Error get product ', error.message);
@@ -95,8 +124,13 @@ const updateProduct = async (req, res, next) => {
     if (!product) {
       return next(new ErrorResponse('Product not exist', NOT_FOUND));
     }
+    const updatePayload = req.body;
     const existedTags = await Tag.find({});
-    const updatePayload = await Utils.handleTags(existedTags, req.body);
+    updatePayload.tags = await Utils.handleTags(
+      existedTags,
+      updatePayload.tags
+    );
+
     const result = await Product.updateById(
       id,
       updatePayload,

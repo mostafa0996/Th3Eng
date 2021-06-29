@@ -19,7 +19,9 @@ module.exports = {
         description: Joi.string().required(),
         screenshots: Joi.array().items(Joi.string()).required(),
         tags: Joi.array().items(Joi.string()).required(),
-        type: Joi.number().valid(...Object.values(PRODUCT_TYPE)).required()
+        type: Joi.number().valid(...Object.values(PRODUCT_TYPE)).required(),
+        price: Joi.when('type', { is: PRODUCT_TYPE.PAID, then: Joi.number().required(), otherwise: Joi.forbidden() }),
+        version: Joi.string().optional()
       }),
   },
 
@@ -45,7 +47,9 @@ module.exports = {
         description: Joi.string().required(),
         screenshots: Joi.array().items(Joi.string()).required(),
         tags: Joi.array().items(Joi.string()).required(),
-        type: Joi.number().valid(...Object.values(PRODUCT_TYPE)).required()
+        type: Joi.number().valid(...Object.values(PRODUCT_TYPE)).required(),
+        price: Joi.when('type', { is: PRODUCT_TYPE.PAID, then: Joi.number().required(), otherwise: Joi.forbidden() }),
+        version: Joi.string().optional()
       }),
   },
 
