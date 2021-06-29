@@ -219,7 +219,6 @@ const getAllUsers = async (req, res, next) => {
       limit: limit,
     };
     const query = formatSearchOptions(req.query);
-    console.log(query, options);
     const count = await User.count(query);
     const users = await User.find(query, options);
     return res.status(OK).json({

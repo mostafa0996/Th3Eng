@@ -50,9 +50,9 @@ const getAllBlogs = async (req, res, next) => {
       skip: (limit * page) - limit,
       limit: limit,
     };
-    console.log(options);
-    const count = await Blog.count();
-    const blogs = await Blog.find({}, options, populateCollection);
+    const searchQuery = Utils.formatSearchQuery(req.query.search);
+    const count = await Blog.count(searchQuery);
+    const blogs = await Blog.find(searchQuery, options, populateCollection);
     return res.status(OK).json({
       success: true,
       message: 'Blogs loaded successfully',

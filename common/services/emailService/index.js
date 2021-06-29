@@ -14,7 +14,6 @@ const _sendEmail = async (email, subject, text) => {
   sgMail.send(msg).then(
     () => {},
     (error) => {
-      console.log(error);
       if (error.response) {
         logger.error(JSON.stringify(error.response.body));
         throw new Error(JSON.stringify(error.response.body));

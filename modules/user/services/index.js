@@ -27,7 +27,6 @@ const exportUsersService = async () => {
   try {
     const users = await User.find({});
     const result = await _formatXlsxObject(users);
-    console.log(result);
     const wb = { SheetNames: [], Sheets: {} };
     wb.SheetNames.push('Users');
     wb.Sheets.Users = XLSX.utils.json_to_sheet(result);

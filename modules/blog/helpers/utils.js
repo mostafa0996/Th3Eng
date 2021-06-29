@@ -20,10 +20,7 @@ class Utils {
     }
 
     // find not existed categories to create them
-    let notExistedCategories = _.difference(
-      categories,
-      existedCategoriesNames
-    );
+    let notExistedCategories = _.difference(categories, existedCategoriesNames);
     notExistedCategories = notExistedCategories.map((ele) => ({ name: ele }));
     let createdCategories;
     if (notExistedCategories) {
@@ -34,6 +31,21 @@ class Utils {
       ? [...payloadCategoriesIds, ...createdCategoriesIds]
       : [...payloadCategoriesIds];
     return categories;
+  };
+
+  static formatSearchQuery = (text) => {
+    const query = {};
+    if (text && text != '') {
+      query.$or = [
+        {
+          title: {$regex: text},
+        },
+        {
+          description: {$regex: text},
+        },
+      ];
+    }
+    return query;
   };
 }
 

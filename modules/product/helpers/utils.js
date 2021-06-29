@@ -20,10 +20,7 @@ class Utils {
     }
 
     // find not existed tags to create them
-    let notExistedTags = _.difference(
-      tags,
-      existedTagsNames
-    );
+    let notExistedTags = _.difference(tags, existedTagsNames);
     notExistedTags = notExistedTags.map((ele) => ({ name: ele }));
     let createdTags;
     if (notExistedTags) {
@@ -34,6 +31,25 @@ class Utils {
       ? [...payloadTagsIds, ...createdTagsIds]
       : [...payloadTagsIds];
     return tags;
+  };
+
+  static formatSearchQuery = (text) => {
+    const query = {};
+
+    if (text && text != '') {
+      query.$or = [
+        {
+          name: { $regex: text },
+        },
+        {
+          secondName: { $regex: text },
+        },
+        {
+          description: { $regex: text },
+        },
+      ];
+    }
+    return query;
   };
 }
 

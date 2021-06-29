@@ -20,7 +20,6 @@ const resizeImage = (filePath, fileName) => new Promise((resolve, reject) => {
       }
       fs.writeFile(path.join(__dirname, `../../../tmp/${fileName}`), buffer, (error) => {
         if (error) {
-          console.log(error);
           reject(error);
         }
         logger.info(`File compressed successfully to ${filePath}`);
@@ -45,7 +44,6 @@ const gcUploader = async (file, type) => {
       return imageLink;
     })
     .catch((error) => {
-      console.log(error);
       throw new Error(error);
     });
 };
