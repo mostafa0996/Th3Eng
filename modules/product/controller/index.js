@@ -69,6 +69,7 @@ const getAllProducts = async (req, res, next) => {
       message: 'Products loaded successfully',
       count,
       totalPages: Math.ceil(count / limit),
+      limit,
       data: result,
     });
   } catch (error) {
