@@ -18,6 +18,7 @@ const ErrorResponse = require('../../../common/utils/errorResponse');
 const Utils = require('../helpers/utils');
 const Product = require('../model/index');
 const Tag = require('../../../common/schema/Tag');
+const { profile } = require('winston');
 
 const createProduct = async (req, res, next) => {
   try {
@@ -55,12 +56,20 @@ const getAllProducts = async (req, res, next) => {
       options,
       populateCollection
     );
+
+    const result = products.map(p => {
+      const tags = p.tags.map(tag => tag.name);
+      return {
+        ...p._doc, tags
+      };
+    });
+
     return res.status(OK).json({
       success: true,
       message: 'Products loaded successfully',
       count,
       totalPages: Math.ceil(count / limit),
-      data: products,
+      data: result,
     });
   } catch (error) {
     logger.error('Error retrieve products ', error.message);
