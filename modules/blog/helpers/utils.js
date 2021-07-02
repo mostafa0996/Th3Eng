@@ -9,43 +9,39 @@ class Utils {
     //convert categories to lowercase
     categories = categories.map((cat) => cat.toLowerCase());
 
-    // get requested categories ids
-    let payloadCategoriesIds = [];
-    for (const payloadCategoryName of categories) {
-      for (const existedCategory of existedCategories) {
-        if (existedCategory.name == payloadCategoryName) {
-          payloadCategoriesIds.push(existedCategory._id);
-        }
-      }
-    }
-
     // find not existed categories to create them
     let notExistedCategories = _.difference(categories, existedCategoriesNames);
     notExistedCategories = notExistedCategories.map((ele) => ({ name: ele }));
-    let createdCategories;
+    
     if (notExistedCategories) {
-      createdCategories = await Category.insertMany(notExistedCategories);
+      await Category.insertMany(notExistedCategories);
     }
-    const createdCategoriesIds = createdCategories.map((ele) => ele._id);
-    categories = createdCategoriesIds.length
-      ? [...payloadCategoriesIds, ...createdCategoriesIds]
-      : [...payloadCategoriesIds];
+
     return categories;
   };
 
-  static formatSearchQuery = (text) => {
-    const query = {};
-    if (text && text != '') {
-      query.$or = [
+  static formatSearchQuery = (query) => {
+    const formattedQuery = {};
+    if (query.text && query.text != '') {
+      formattedQuery.$or = [
         {
-          title: {$regex: text},
+          title: { $regex: query.text },
         },
         {
-          description: {$regex: text},
+          description: { $regex: query.text },
+        },
+        {
+          categories: { $in: query.text },
         },
       ];
     }
-    return query;
+
+    if (query.categories) {
+      const categories = query.categories.split(',');
+      formattedQuery.categories = { $in: categories };
+    }
+
+    return formattedQuery;
   };
 }
 

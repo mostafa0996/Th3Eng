@@ -42,13 +42,16 @@ const ProductSchema = new Schema(
       required: true,
     },
     tags: {
-      type:[{ type: Schema.Types.ObjectId, ref: 'tags' }],
+      type:[String],
       required: true,
     },
     visibility: {
       type: Boolean,
       default: true
     },
+    file: {
+      type: String,
+    }
   },
   {
     collection: 'products',

@@ -43,21 +43,21 @@ const createBlog = async (req, res, next) => {
 
 const getAllBlogs = async (req, res, next) => {
   try {
-    const populateCollection = 'categories';
     const limit = Number(req.query.limit) || PAGE_LIMIT;
     const page = Number(req.query.page) || 1;
     const options = {
       skip: (limit * page) - limit,
       limit: limit,
     };
-    const searchQuery = Utils.formatSearchQuery(req.query.search);
+    const searchQuery = Utils.formatSearchQuery(req.query);
     const count = await Blog.count(searchQuery);
-    const blogs = await Blog.find(searchQuery, options, populateCollection);
+    const blogs = await Blog.find(searchQuery, options);
     return res.status(OK).json({
       success: true,
       message: 'Blogs loaded successfully',
       count,
       totalPages: Math.ceil(count/limit),
+      limit,
       data: blogs,
     });
   } catch (error) {
@@ -70,9 +70,8 @@ const getAllBlogs = async (req, res, next) => {
 
 const getBlog = async (req, res, next) => {
   const { id } = req.params;
-  const populateCollection = 'categories';
   try {
-    const blog = await Blog.findById(id, {}, populateCollection);
+    const blog = await Blog.findById(id, {});
     if (!blog) {
       return next(new ErrorResponse('Blog not exist', NOT_FOUND));
     }
@@ -91,18 +90,23 @@ const getBlog = async (req, res, next) => {
 
 const updateBlog = async (req, res, next) => {
   const { id } = req.params;
-  const populateCollection = 'categories';
   try {
-    const blog = await Blog.findById(id, { _id: 1 }, populateCollection);
+    const blog = await Blog.findById(id, { _id: 1 });
     if (!blog) {
       return next(new ErrorResponse('Blog not exist', NOT_FOUND));
     }
-    const existedCategories = await Category.find({});
-    const updatePayload = await Utils.handleCategories(
-      existedCategories,
-      req.body.categories
-    );
-    const result = await Blog.updateById(id, updatePayload, populateCollection);
+    if ('visibility' in req.body) {
+      const updatedPayload = { visibility: req.body.visibility };
+      result = await Blog.updateById(id, updatedPayload);
+    } else {
+      const updatePayload = req.body.blogData;
+      const existedCategories = await Category.find({});
+      updatePayload.categories = await Utils.handleCategories(
+        existedCategories,
+        updatePayload.categories
+      );
+      result = await Blog.updateById(id, updatePayload);
+    }
     return res.status(OK).json({
       success: true,
       message: 'Blog updated successfully',

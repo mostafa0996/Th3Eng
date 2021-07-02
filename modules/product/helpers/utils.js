@@ -9,47 +9,56 @@ class Utils {
     //convert tags to lowercase
     tags = tags.map((tag) => tag.toLowerCase());
 
-    // get requested tags ids
-    let payloadTagsIds = [];
-    for (const payloadTagName of tags) {
-      for (const existedTag of existedTags) {
-        if (existedTag.name == payloadTagName) {
-          payloadTagsIds.push(existedTag._id);
-        }
-      }
-    }
-
     // find not existed tags to create them
     let notExistedTags = _.difference(tags, existedTagsNames);
     notExistedTags = notExistedTags.map((ele) => ({ name: ele }));
-    let createdTags;
+
     if (notExistedTags) {
-      createdTags = await Tag.insertMany(notExistedTags);
+      await Tag.insertMany(notExistedTags);
     }
-    const createdTagsIds = createdTags.map((ele) => ele._id);
-    tags = createdTagsIds.length
-      ? [...payloadTagsIds, ...createdTagsIds]
-      : [...payloadTagsIds];
+
     return tags;
   };
 
-  static formatSearchQuery = (text) => {
-    const query = {};
-
-    if (text && text != '') {
-      query.$or = [
+  static formatSearchQuery = (query) => {
+    const formattedQuery = {};
+    if (query.text && query.text != '') {
+      formattedQuery.$or = [
         {
-          name: { $regex: text },
+          name: { $regex: query.text },
         },
         {
-          secondName: { $regex: text },
+          secondName: { $regex: query.text },
         },
         {
-          description: { $regex: text },
+          description: { $regex: query.text },
+        },
+        {
+          tags: { $in: query.text },
         },
       ];
     }
-    return query;
+    if (query.type) {
+      formattedQuery.type = Number(query.type);
+    }
+    if (query.minPrice) {
+      formattedQuery.price = { $gte: Number(query.minPrice) };
+    }
+    if (query.maxPrice) {
+      formattedQuery.price = formattedQuery.price
+        ? {
+            ...formattedQuery.price,
+            $lte: Number(query.maxPrice),
+          }
+        : { $lte: Number(query.maxPrice) };
+    }
+
+    if (query.tags) {
+      const tags = query.tags.split(',');
+      formattedQuery.tags = { $in: tags };
+    }
+
+    return formattedQuery;
   };
 }
 

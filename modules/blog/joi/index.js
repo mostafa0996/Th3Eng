@@ -6,6 +6,8 @@ module.exports = {
     query: Joi.object().keys({
       page: Joi.number(),
       limit: Joi.number(),
+      text: Joi.string(),
+      categories: Joi.string(),
     }),
   },
 
@@ -38,12 +40,16 @@ module.exports = {
     body: Joi.object()
       .required()
       .keys({
-        title: Joi.string().required(),
-        description: Joi.string().required(),
-        images: Joi.array().items(Joi.string()).required(),
-        categories: Joi.array().items(Joi.string()).required(),
-        cover: Joi.string().required(),
-      }),
+        blogData: Joi.object().keys({
+          title: Joi.string().required(),
+          description: Joi.string().required(),
+          images: Joi.array().items(Joi.string()).required(),
+          categories: Joi.array().items(Joi.string()).required(),
+          cover: Joi.string().required(),
+        }),
+        visibility: Joi.boolean(),
+      })
+      .xor('blogData', 'visibility'),
   },
 
   deleteBlogSchema: {

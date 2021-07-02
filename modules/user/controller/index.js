@@ -52,7 +52,6 @@ const login = async (req, res, next) => {
       data: { user, token: data.token },
     });
   } catch (error) {
-    console.error(error)
     logger.error('Error while login ', error.message);
     next(
       new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)

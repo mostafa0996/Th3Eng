@@ -20,7 +20,7 @@ const BlogSchema = new Schema(
       required: true,
     },
     categories: {
-      type:[{ type: Schema.Types.ObjectId, ref: 'categories' }],
+      type: [String],
       required: true,
     },
     visibility: {

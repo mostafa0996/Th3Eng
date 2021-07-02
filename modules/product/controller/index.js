@@ -18,7 +18,6 @@ const ErrorResponse = require('../../../common/utils/errorResponse');
 const Utils = require('../helpers/utils');
 const Product = require('../model/index');
 const Tag = require('../../../common/schema/Tag');
-const { profile } = require('winston');
 
 const createProduct = async (req, res, next) => {
   try {
@@ -42,27 +41,18 @@ const createProduct = async (req, res, next) => {
 
 const getAllProducts = async (req, res, next) => {
   try {
-    const populateCollection = 'tags';
     const limit = Number(req.query.limit) || PAGE_LIMIT;
     const page = Number(req.query.page) || 1;
     const options = {
       skip: limit * page - limit,
       limit: limit,
     };
-    const searchQuery = Utils.formatSearchQuery(req.query.search);
+    const searchQuery = Utils.formatSearchQuery(req.query);
     const count = await Product.count(searchQuery);
     const products = await Product.find(
       searchQuery,
       options,
-      populateCollection
     );
-
-    const result = products.map(p => {
-      const tags = p.tags.map(tag => tag.name);
-      return {
-        ...p._doc, tags
-      };
-    });
 
     return res.status(OK).json({
       success: true,
@@ -70,7 +60,7 @@ const getAllProducts = async (req, res, next) => {
       count,
       totalPages: Math.ceil(count / limit),
       limit,
-      data: result,
+      data: products,
     });
   } catch (error) {
     logger.error('Error retrieve products ', error.message);
@@ -82,15 +72,14 @@ const getAllProducts = async (req, res, next) => {
 
 const getProduct = async (req, res, next) => {
   const { id } = req.params;
-  const populateCollection = 'tags';
   const result = {};
   try {
-    const product = await Product.findById(id, {}, populateCollection);
+    const product = await Product.findById(id, {});
     if (!product) {
       return next(new ErrorResponse('Product not exist', NOT_FOUND));
     }
-    const tags = product.tags.map((tag) => tag._id) || null;
-    if (tags.length > 0) {
+    const tags = product.tags;
+    if (tags && tags.length > 0) {
       result.relatedProducts = await Product.find(
         {
           $and: [
@@ -128,24 +117,24 @@ const getProduct = async (req, res, next) => {
 
 const updateProduct = async (req, res, next) => {
   const { id } = req.params;
-  const populateCollection = 'tags';
+  let result;
   try {
-    const product = await Product.findById(id, { _id: 1 }, populateCollection);
+    const product = await Product.findById(id, { _id: 1 });
     if (!product) {
       return next(new ErrorResponse('Product not exist', NOT_FOUND));
     }
-    const updatePayload = req.body;
-    const existedTags = await Tag.find({});
-    updatePayload.tags = await Utils.handleTags(
-      existedTags,
-      updatePayload.tags
-    );
-
-    const result = await Product.updateById(
-      id,
-      updatePayload,
-      populateCollection
-    );
+    if ('visibility' in req.body) {
+      const updatedPayload = { visibility: req.body.visibility };
+      result = await Product.updateById(id, updatedPayload);
+    } else {
+      const updatePayload = req.body.productData;
+      const existedTags = await Tag.find({});
+      updatePayload.tags = await Utils.handleTags(
+        existedTags,
+        updatePayload.tags
+      );
+      result = await Product.updateById(id, updatePayload);
+    }
     return res.status(OK).json({
       success: true,
       message: 'Product updated successfully',
