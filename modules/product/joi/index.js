@@ -23,7 +23,7 @@ module.exports = {
         name: Joi.string().required(),
         secondName: Joi.string().required(),
         description: Joi.string().required(),
-        screenshots: Joi.array().items(Joi.string()).required(),
+        screenshots: Joi.array().items(Joi.string()).min(1).required(),
         tags: Joi.array().items(Joi.string()).required(),
         type: Joi.number()
           .valid(...Object.values(PRODUCT_TYPE))
@@ -60,7 +60,7 @@ module.exports = {
           secondName: Joi.string().required(),
           description: Joi.string().required(),
           screenshots: Joi.array().items(Joi.string()).required(),
-          tags: Joi.array().items(Joi.string()).required(),
+          tags: Joi.array().items(Joi.string()).min(1).required(),
           type: Joi.number()
             .valid(...Object.values(PRODUCT_TYPE))
             .required(),
