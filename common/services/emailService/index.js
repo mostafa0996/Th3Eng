@@ -28,7 +28,7 @@ const sendVerificationEmail = async (token, name, email) => {
   // todo: front end make email template that has a clickable button routes to our frontend.
   const text = `Hello ${name},
                 Please verify you account through this link
-                ${token}
+                http://localhost:3000/home/Verification/${token}
                 Thanks`;
   return _sendEmail(email, subject, text);
 };
@@ -39,7 +39,7 @@ const sendPasswordResetEmail = async (token, name, email) => {
   // todo: front end make email template that has a clickable button routes to our frontend.
   const text = `Hello ${name},
                 Please reset your password through this link
-                ${token}
+                http://localhost:3000/home/NewPassword/${token}
                 Thanks`;
   return _sendEmail(email, subject, text);
 };
