@@ -237,10 +237,10 @@ const getAllUsers = async (req, res, next) => {
 
 const getUser = async (req, res, next) => {
   try {
-    const selector = req.param.id;
-    const user = await User.find(selector, options);
+    const id = req.param.id;
+    const user = await User.findById(id, {});
     if (!user) {
-      return next(new ErrorResponse('Blog not exist', NOT_FOUND));
+      return next(new ErrorResponse('User not found', NOT_FOUND));
     }
     return res.status(OK).json({
       success: true,
@@ -328,6 +328,29 @@ const exportUsers = async (req, res, next) => {
   }
 };
 
+const sendHireDeveloperEmail = async (req, res, next) => {
+  try {
+    const id = req.user._id;
+    const user = await User.findById(id, {});
+    if (!user) {
+      return next(new ErrorResponse('User not found', NOT_FOUND));
+    }
+    const email = user.email;
+    const { description } = req.body;
+    EmailService.sendHireDeveloperEmail(email, description)
+    return res.status(OK).json({
+      success: true,
+      message: 'Email sent successfully',
+      data: null,
+    });
+  } catch (error) {
+    logger.error('Error get user', error.message);
+    next(
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+    );
+  }
+};
+
 module.exports = {
   login,
   signUp,
@@ -340,5 +363,6 @@ module.exports = {
   getUser,
   updateUser,
   deleteUser,
-  exportUsers
+  exportUsers,
+  sendHireDeveloperEmail
 };

@@ -21,42 +21,44 @@ const {
 } = require('./joi/index');
 
 const {
-  PRODUCT_CREATE_PRODUCT,
-  PRODUCT_DELETE_PRODUCT,
-  PRODUCT_GET_ALL_PRODUCTS,
-  PRODUCT_GET_PRODUCT,
-  PRODUCT_UPDATE_PRODUCT,
+  endPoints: {
+    PRODUCT_CREATE_PRODUCT,
+    PRODUCT_DELETE_PRODUCT,
+    PRODUCT_GET_ALL_PRODUCTS,
+    PRODUCT_GET_PRODUCT,
+    PRODUCT_UPDATE_PRODUCT,
+  },
 } = require('./helpers/constants');
 
 router.get(
   '/',
-  //   isAuthorized(PRODUCT_GET_ALL_PRODUCTS),
+  isAuthorized(PRODUCT_GET_ALL_PRODUCTS),
   validateRequest(getAllProductsSchema),
   getAllProducts
 );
 
 router.post(
   '/',
-  //   isAuthorized(PRODUCT_CREATE_PRODUCT),
+  isAuthorized(PRODUCT_CREATE_PRODUCT),
   validateRequest(createProductSchema),
   createProduct
 );
 
 router.get(
   '/:id',
-//   isAuthorized(PRODUCT_GET_PRODUCT),
+  isAuthorized(PRODUCT_GET_PRODUCT),
   validateRequest(getProductSchema),
   getProduct
 );
 router.put(
   '/:id',
-//   isAuthorized(PRODUCT_UPDATE_PRODUCT),
+  isAuthorized(PRODUCT_UPDATE_PRODUCT),
   validateRequest(updateProductSchema),
   updateProduct
 );
 router.delete(
   '/:id',
-//   isAuthorized(PRODUCT_DELETE_PRODUCT),
+  isAuthorized(PRODUCT_DELETE_PRODUCT),
   validateRequest(deleteProductSchema),
   deleteProduct
 );

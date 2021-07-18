@@ -31,33 +31,33 @@ const {
 
 router.get(
   '/',
-  //   isAuthorized(BLOG_GET_ALL_BLOGS),
+    isAuthorized(BLOG_GET_ALL_BLOGS),
   validateRequest(getAllBlogsSchema),
   getAllBlogs
 );
 
 router.post(
   '/',
-  //   isAuthorized(BLOG_CREATE_BLOG),
+    isAuthorized(BLOG_CREATE_BLOG),
   validateRequest(createBlogSchema),
   createBlog
 );
 
 router.get(
   '/:id',
-  //   isAuthorized(BLOG_GET_BLOG),
+    isAuthorized(BLOG_GET_BLOG),
   validateRequest(getBlogSchema),
   getBlog
 );
 router.put(
   '/:id',
-  //   isAuthorized(BLOG_UPDATE_BLOG),
+    isAuthorized(BLOG_UPDATE_BLOG),
   validateRequest(updateBlogSchema),
   updateBlog
 );
 router.delete(
   '/:id',
-  //   isAuthorized(BLOG_DELETE_BLOG),
+    isAuthorized(BLOG_DELETE_BLOG),
   validateRequest(deleteBlogSchema),
   deleteBlog
 );

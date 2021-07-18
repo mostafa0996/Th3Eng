@@ -12,7 +12,9 @@ const _sendEmail = async (email, subject, text) => {
   };
 
   sgMail.send(msg).then(
-    () => {},
+    (result) => {
+      logger.info(JSON.stringify(result, null, 2));
+    },
     (error) => {
       if (error.response) {
         logger.error(JSON.stringify(error.response.body));
@@ -44,7 +46,16 @@ const sendPasswordResetEmail = async (token, name, email) => {
   return _sendEmail(email, subject, text);
 };
 
+const sendHireDeveloperEmail = async (fromEmail, body) => {
+  const subject = 'Hire a developer request';
+  const text = `Thi request is from ${fromEmail}.
+  ${body}
+  `;
+  return _sendEmail('eng.ahmedfarag.a+1@gmail.com', subject, text);
+};
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
+  sendHireDeveloperEmail,
 };

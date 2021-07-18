@@ -23,19 +23,19 @@ router.get('/tags', async (req, res, next) => {
 });
 
 router.get('/categories', async (req, res, next) => {
-    try {
-      const categories = await Category.find({});
-      return res.status(OK).json({
-        success: true,
-        message: 'Categories loaded successfully',
-        data: categories,
-      });
-    } catch (error) {
-      logger.error('Error get all categories ', error.message);
-      next(
-        new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
-      );
-    }
-  });
+  try {
+    const categories = await Category.find({});
+    return res.status(OK).json({
+      success: true,
+      message: 'Categories loaded successfully',
+      data: categories,
+    });
+  } catch (error) {
+    logger.error('Error get all categories ', error.message);
+    next(
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+    );
+  }
+});
 
 module.exports = router;

@@ -29,7 +29,9 @@ const isAuthorized = (endPointName) => {
           return next(new ErrorResponse('Unauthorized', UNAUTHORIZED));
         }
         req.user = user;
-        const isAllowed = await rbac.can(req.user.roles, endPointName);
+        console.log(req.user.role, endPointName);
+        const isAllowed = await rbac.can(req.user.role.toString(), endPointName);
+        console.log(isAllowed);
         if (!isAllowed) {
           return next(
             new ErrorResponse(
