@@ -1,5 +1,5 @@
 const initRoutes = require('./init-routes');
-const connectDB = require('./init-db');
+const connectDB = require('./db/init-db');
 
 /**
  * @function
@@ -9,5 +9,5 @@ const connectDB = require('./init-db');
  */
 module.exports = (app) => {
   initRoutes(app);
-  connectDB();
+  connectDB;
 };
