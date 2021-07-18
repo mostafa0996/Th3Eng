@@ -139,7 +139,7 @@ const verifyUser = async (req, res, next) => {
 const forgotPassword = async (req, res, next) => {
   const { email } = req.body;
   try {
-    const user = await User.getUserByQuery({ email });
+    const user = await User.findOne({ email });
     if (!user) {
       throw new Error('Invalid Email Address');
     }

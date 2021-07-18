@@ -52,7 +52,10 @@ app.use(
 app.use(express.json({ limit: '50mb' }));
 
 // Used to enable CORS
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
+}));
 // Protect against HTTP Parameter Pollution attacks
 app.use(hpp());
 // Sanitize data
