@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const Tag = require('../schema/Tag');
-const Category = require('../schema/Category');
+const { Tag, Category } = require('../init/db/init-db');
 const ErrorResponse = require('../utils/errorResponse');
 const logger = require('../config/logger');
 const { INTERNAL_SERVER_ERROR, OK } = require('http-status-codes');
 
 router.get('/tags', async (req, res, next) => {
   try {
-    const tags = await Tag.find({});
+    const tags = await Tag.findAll({});
     return res.status(OK).json({
       success: true,
       message: 'Tags loaded successfully',
@@ -24,7 +23,7 @@ router.get('/tags', async (req, res, next) => {
 
 router.get('/categories', async (req, res, next) => {
   try {
-    const categories = await Category.find({});
+    const categories = await Category.findAll({});
     return res.status(OK).json({
       success: true,
       message: 'Categories loaded successfully',

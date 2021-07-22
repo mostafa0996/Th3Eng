@@ -57,4 +57,6 @@ module.exports = {
   User: db.users,
   Blog: db.blogs,
   Product: db.products,
+  Tag: db.tags,
+  Category: db.categories,
 };

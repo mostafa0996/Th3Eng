@@ -1,6 +1,6 @@
 const XLSX = require('xlsx');
 const _ = require('lodash');
-const User = require('../model/index');
+const { User } = require('../../../common/init/db/init-db');
 const ErrorResponse = require('../../../common/utils/errorResponse');
 const getUserRoleString = require('../../../common/utils/getUserRolesString');
 
@@ -25,7 +25,7 @@ const _formatXlsxObject = async (users) => {
 
 const exportUsersService = async () => {
   try {
-    const users = await User.find({});
+    const users = await User.findAll();
     const result = await _formatXlsxObject(users);
     const wb = { SheetNames: [], Sheets: {} };
     wb.SheetNames.push('Users');

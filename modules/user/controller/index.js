@@ -8,7 +8,8 @@ const {
 } = require('http-status-codes');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const moment = require('moment')
+const moment = require('moment');
+const { Op } = require('sequelize');
 const {
   roles: { ADMIN, CUSTOMER, MODERATOR },
 } = require('../../../common/enum/roles');
@@ -16,9 +17,14 @@ const logger = require('../../../common/config/logger');
 const config = require('../../../common/config/configuration');
 const EmailService = require('../../../common/services/emailService');
 const { PAGE_LIMIT } = require('../../../common/constants');
-const User = require('../model/index');
+const { User } = require('../../../common/init/db/init-db');
 const ErrorResponse = require('../../../common/utils/errorResponse');
-const { formatSearchOptions } = require('../helpers/utils');
+const {
+  formatSearchOptions,
+  validatePassword,
+  toAuthJSON,
+  generateJWT,
+} = require('../helpers/utils');
 const { exportUsersService } = require('../services/index');
 // auth controllers
 const socialCallback = require('./socialCallback');
@@ -27,7 +33,13 @@ const socialLogin = require('./socialLogin');
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      where: {
+        email,
+      },
+      raw: true,
+    });
+
     if (!user) {
       return next(
         new ErrorResponse(
@@ -35,8 +47,8 @@ const login = async (req, res, next) => {
           NOT_FOUND
         )
       );
-    };
-    const isMatch = await user.validatePassword(password);
+    }
+    const isMatch = await validatePassword(password, user.password);
     if (!isMatch) {
       return next(
         new ErrorResponse(
@@ -45,13 +57,14 @@ const login = async (req, res, next) => {
         )
       );
     }
-    const data = user.toAuthJSON();
+    const data = toAuthJSON(user);
     return res.status(OK).json({
       success: true,
       message: 'User logged in successfully',
       data: { user, token: data.token },
     });
   } catch (error) {
+    console.log(error);
     logger.error('Error while login ', error.message);
     next(
       new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
@@ -88,7 +101,8 @@ const signUp = async (req, res, next) => {
       verificationToken,
       verificationTokenExpiration,
     };
-    await User.updateById(user._id, updatePayload);
+    await User.update(updatePayload, { where: { id: user.id } });
+
     EmailService.sendVerificationEmail(
       verificationToken,
       payload.firstName,
@@ -99,6 +113,7 @@ const signUp = async (req, res, next) => {
       .status(CREATED)
       .json({ success: true, message: 'User Created', data: user });
   } catch (error) {
+    console.log(error);
     logger.error('Error while signup ', error.message);
     next(
       new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
@@ -113,7 +128,10 @@ const verifyUser = async (req, res, next) => {
       verificationToken: token,
       verificationTokenExpiration: { $gt: new Date() },
     };
-    const user = await User.findOne(selector);
+    const user = await User.findOne({
+      where: selector,
+      raw: true,
+    });
     if (!user) {
       throw new Error('No valid token found');
     }
@@ -122,7 +140,7 @@ const verifyUser = async (req, res, next) => {
       verificationToken: null,
       verificationTokenExpiration: null,
     };
-    await User.updateById(user._id, updatePayload);
+    await User.update(updatePayload, { where: { id: user.id } });
     return res.status(OK).json({
       success: true,
       message: 'User Verified successfully',
@@ -139,7 +157,12 @@ const verifyUser = async (req, res, next) => {
 const forgotPassword = async (req, res, next) => {
   const { email } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      where: {
+        email,
+      },
+      raw: true,
+    });
     if (!user) {
       throw new Error('Invalid Email Address');
     }
@@ -155,7 +178,7 @@ const forgotPassword = async (req, res, next) => {
       resetPasswordToken,
       resetPasswordExpiration,
     };
-    await User.updateById(user._id, updatePayload);
+    await User.update(updatePayload, { where: { id: user.id } });
     EmailService.sendPasswordResetEmail(
       resetPasswordToken,
       user.firstName,
@@ -181,9 +204,12 @@ const resetPassword = async (req, res, next) => {
     const salt = await bcrypt.genSalt(+config.salt);
     const selector = {
       resetPasswordToken: token,
-      resetPasswordExpiration: { $gt: new Date() },
+      resetPasswordExpiration: { [Op.gt]: new Date() },
     };
-    const user = await User.findOne(selector);
+    const user = await User.findOne({
+      where: selector,
+      raw: true,
+    });
     if (!user) {
       throw new Error('No valid token found');
     }
@@ -194,7 +220,7 @@ const resetPassword = async (req, res, next) => {
       resetPasswordExpiration: null,
       password: hashedPassword,
     };
-    await User.updateById(user._id, updatePayload);
+    await User.update(updatePayload, { where: { id: user.id } });
     return res.status(OK).json({
       success: true,
       message: 'User Password Reset successfully',
@@ -212,19 +238,27 @@ const getAllUsers = async (req, res, next) => {
   try {
     const page = req.query.page || 1;
     const limit = Number(req.query.limit) || PAGE_LIMIT;
+    const offset = limit * page - limit;
     delete req.query.page;
-    const options = {
-      skip: limit * page - limit,
-      limit: limit,
-    };
-    const query = formatSearchOptions(req.query);
-    const count = await User.count(query);
-    const users = await User.find(query, options);
+    const { rows, count } = await User.findAndCountAll({
+      raw: true,
+      limit: parseInt(limit, 10),
+      offset: parseInt(offset, 10),
+    });
+    console.log(count);
+    const users = rows.map((row) => {
+      const _id = row.id;
+      delete row.id;
+      return {
+        ...row,
+        _id,
+      };
+    });
     return res.status(OK).json({
       success: true,
       message: 'Users loaded successfully',
       count,
-      totalPages: Math.ceil(count/limit),
+      totalPages: Math.ceil(count / limit),
       data: users,
     });
   } catch (error) {
@@ -238,7 +272,10 @@ const getAllUsers = async (req, res, next) => {
 const getUser = async (req, res, next) => {
   try {
     const id = req.param.id;
-    const user = await User.findById(id, {});
+    const user = await User.findOne({
+      where: { id },
+      raw: true,
+    });
     if (!user) {
       return next(new ErrorResponse('User not found', NOT_FOUND));
     }
@@ -276,7 +313,8 @@ const updateUser = async (req, res, next) => {
       updatePayload.role = payload.role;
       updatePayload.vip = payload.vip;
     }
-    const user = await User.updateById(userId, updatePayload);
+    await User.update(updatePayload, { where: { id: user.id } });
+
     return res.status(OK).json({
       success: true,
       message: 'Users updated successfully',
@@ -292,8 +330,10 @@ const updateUser = async (req, res, next) => {
 
 const deleteUser = async (req, res, next) => {
   try {
-    const userId = req.params.id;
-    const user = await User.deleteById(userId);
+    const id = req.params.id;
+    const user = await User.destroy({
+      where: { id },
+    });
     return res.status(OK).json({
       success: true,
       message: 'User deleted successfully',
@@ -331,13 +371,16 @@ const exportUsers = async (req, res, next) => {
 const sendHireDeveloperEmail = async (req, res, next) => {
   try {
     const id = req.user._id;
-    const user = await User.findById(id, {});
+    const user = await User.findOne({
+      where: { id },
+      raw: true,
+    });
     if (!user) {
       return next(new ErrorResponse('User not found', NOT_FOUND));
     }
     const email = user.email;
     const { description } = req.body;
-    EmailService.sendHireDeveloperEmail(email, description)
+    EmailService.sendHireDeveloperEmail(email, description);
     return res.status(OK).json({
       success: true,
       message: 'Email sent successfully',
@@ -364,5 +407,5 @@ module.exports = {
   updateUser,
   deleteUser,
   exportUsers,
-  sendHireDeveloperEmail
+  sendHireDeveloperEmail,
 };

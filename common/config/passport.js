@@ -5,19 +5,22 @@ const FacebookStrategy = require('passport-facebook').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const config = require('./configuration');
-const User = require('../../modules/user/schema/index');
+const { User } = require('../init/db/init-db');
 
 const jwtOpts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: config.jwt.key,
-  algorithms: ['HS256']
+  algorithms: ['HS256'],
 };
 
 passport.use(
   'jwt',
   new JwtStrategy(jwtOpts, async (payload, done) => {
     try {
-      const user = await User.findById(payload._id);
+      const user = await User.findOne({
+        where: { id: payload.id },
+        raw: true,
+      });
       if (user) {
         return done(null, user);
       }
@@ -41,8 +44,8 @@ passport.use(
         'email',
         'first_name',
         'last_name',
-        'link'
-      ]
+        'link',
+      ],
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -51,13 +54,16 @@ passport.use(
         const {
           first_name: firstName,
           last_name: lastName,
-          picture
+          picture,
         } = profile._json;
         let photo = picture.data.url;
         if (!photo) {
           photo = photos.length ? photos[0].value : null;
         }
-        let user = await User.findOne({ facebookId });
+        let user = await User.findOne({
+          where: { facebookId },
+          raw: true,
+        });
         if (!user) {
           user = await User.create({
             facebookId,
@@ -66,7 +72,7 @@ passport.use(
             photo,
             firstName,
             lastName,
-            verified: true
+            verified: true,
           });
         }
         done(null, user);
@@ -82,7 +88,7 @@ passport.use(
     {
       clientID: config.google.clientId,
       clientSecret: config.google.clientSecret,
-      callbackURL: config.google.callbackURL
+      callbackURL: config.google.callbackURL,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -92,13 +98,16 @@ passport.use(
           given_name: firstName,
           family_name: lastName,
           picture,
-          email_verified: verified
+          email_verified: verified,
         } = profile._json;
         let photo = picture;
         if (!photo) {
           photo = photos.length ? photos[0].value : null;
         }
-        let user = await User.findOne({ googleId });
+        let user = await User.findOne({
+          where: { googleId },
+          raw: true,
+        });
         if (!user) {
           user = await User.create({
             googleId,
@@ -107,7 +116,7 @@ passport.use(
             firstName,
             lastName,
             verified,
-            photo
+            photo,
           });
         }
         done(null, user);
