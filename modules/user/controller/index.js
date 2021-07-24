@@ -64,7 +64,6 @@ const login = async (req, res, next) => {
       data: { user, token: data.token },
     });
   } catch (error) {
-    console.log(error);
     logger.error('Error while login ', error.message);
     next(
       new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
@@ -113,7 +112,6 @@ const signUp = async (req, res, next) => {
       .status(CREATED)
       .json({ success: true, message: 'User Created', data: user });
   } catch (error) {
-    console.log(error);
     logger.error('Error while signup ', error.message);
     next(
       new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
@@ -245,7 +243,6 @@ const getAllUsers = async (req, res, next) => {
       limit: parseInt(limit, 10),
       offset: parseInt(offset, 10),
     });
-    console.log(count);
     const users = rows.map((row) => {
       const _id = row.id;
       delete row.id;

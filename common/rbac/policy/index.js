@@ -9,6 +9,5 @@ const opts = {
   [ADMIN]: adminPolicy,
   [MODERATOR]: moderatorPolicy,
 };
-console.log(opts);
 
 module.exports = opts;

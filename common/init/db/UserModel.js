@@ -95,8 +95,6 @@ module.exports = (sequelize, DataType) => {
         beforeUpdate: async function (user) {
           const data = user.dataValues;
           if (user.changed('password')) {
-            console.log('Before Create hook');
-
             data.salt = await bcrypt.genSalt(+config.salt);
             data.password = await bcrypt.hash(data.password, data.salt);
           }

@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const Sequelize = require('sequelize');
+const {Sequelize, DataTypes} = require('sequelize');
 const logger = require('../../config/logger');
 
 const basename = path.basename(__filename);
@@ -32,7 +32,7 @@ fs.readdirSync(__dirname)
   )
   .forEach((file) => {
     // eslint-disable-next-line
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+    const model = require(path.join(__dirname, file))(sequelize, DataTypes);
     db[model.name] = model;
   });
 Object.keys(db).forEach((modelName) => {
@@ -59,4 +59,6 @@ module.exports = {
   Product: db.products,
   Tag: db.tags,
   Category: db.categories,
+  Image: db.images,
+  Screenshot: db.screenshots
 };

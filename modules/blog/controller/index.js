@@ -8,26 +8,41 @@ const {
   FORBIDDEN,
   NOT_FOUND,
 } = require('http-status-codes');
-const path = require('path');
-const {
-  roles: { ADMIN, CUSTOMER, MODERATOR },
-} = require('../../../common/enum/roles');
+const { Op } = require('sequelize');
 const logger = require('../../../common/config/logger');
 const { PAGE_LIMIT } = require('../../../common/constants');
 const ErrorResponse = require('../../../common/utils/errorResponse');
-const Utils = require('../helpers/utils');
-const Blog = require('../model/index');
-const Category = require('../../../common/schema/Category');
+const { Blog, Category, Image } = require('../../../common/init/db/init-db');
+const {
+  handleCategories,
+  groupBlogsById,
+  formatSearchQuery,
+  handleImages,
+  formatResult,
+} = require('../helpers/utils');
+const toLowerCaseArrayValues = require('../../../common/utils/toLowerCaseArrayValues');
 
 const createBlog = async (req, res, next) => {
   try {
     const payload = req.body;
-    const existedCategories = await Category.find({});
-    payload.categories = await Utils.handleCategories(
-      existedCategories,
-      payload.categories
-    );
+    const requestedCategories = toLowerCaseArrayValues(payload.categories);
+    delete payload.categories;
     const createdBlog = await Blog.create(payload);
+    await handleImages(payload.images, createdBlog.id);
+    const existedCategories = await Category.findAll({
+      where: {
+        name: {
+          [Op.in]: requestedCategories,
+        },
+      },
+      attributes: ['id', 'name'],
+    });
+    await handleCategories(
+      existedCategories,
+      requestedCategories,
+      createdBlog.id
+    );
+    createdBlog.dataValues.categories = requestedCategories;
     return res.status(CREATED).json({
       success: true,
       message: 'Blog created successfully',
@@ -45,18 +60,42 @@ const getAllBlogs = async (req, res, next) => {
   try {
     const limit = Number(req.query.limit) || PAGE_LIMIT;
     const page = Number(req.query.page) || 1;
-    const options = {
-      skip: (limit * page) - limit,
-      limit: limit,
-    };
-    const searchQuery = Utils.formatSearchQuery(req.query);
-    const count = await Blog.count(searchQuery);
-    const blogs = await Blog.find(searchQuery, options);
+    const offset = limit * page - limit;
+    delete req.query.page;
+
+    const { formattedQuery, categoryFormattedQuery } = formatSearchQuery(
+      req.query
+    );
+    const { rows, count } = await Blog.findAndCountAll({
+      where: { ...formattedQuery, visibility: true },
+      distinct: true,
+      include: [
+        {
+          model: Category,
+          where: categoryFormattedQuery,
+          attributes: ['name'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Image,
+          attributes: ['image'],
+        },
+      ],
+      raw: true,
+      nest: true,
+      limit: parseInt(limit, 10),
+      offset: parseInt(offset, 10),
+    });
+
+    let blogs = formatResult(rows);
+    blogs = groupBlogsById(blogs);
     return res.status(OK).json({
       success: true,
       message: 'Blogs loaded successfully',
       count,
-      totalPages: Math.ceil(count/limit),
+      totalPages: Math.ceil(count / limit),
       limit,
       data: blogs,
     });
@@ -71,10 +110,33 @@ const getAllBlogs = async (req, res, next) => {
 const getBlog = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const blog = await Blog.findById(id, {});
-    if (!blog) {
+    let blog = await Blog.findAll({
+      where: {
+        id,
+        visibility: true,
+      },
+      include: [
+        {
+          model: Category,
+          attributes: ['name'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Image,
+          attributes: ['image'],
+        },
+      ],
+      raw: true,
+      nest: true,
+    });
+    if (!blog.length) {
       return next(new ErrorResponse('Blog not exist', NOT_FOUND));
     }
+    blog = formatResult(blog);
+    blog = groupBlogsById(blog);
+
     return res.status(OK).json({
       success: true,
       message: 'Blog loaded successfully',
@@ -90,23 +152,66 @@ const getBlog = async (req, res, next) => {
 
 const updateBlog = async (req, res, next) => {
   const { id } = req.params;
+  let result;
   try {
-    const blog = await Blog.findById(id, { _id: 1 });
+    const blog = await Blog.findOne({
+      where: {
+        id,
+      },
+      attributes: ['id'],
+    });
     if (!blog) {
       return next(new ErrorResponse('Blog not exist', NOT_FOUND));
     }
     if ('visibility' in req.body) {
       const updatedPayload = { visibility: req.body.visibility };
-      result = await Blog.updateById(id, updatedPayload);
+      await Blog.update(updatedPayload, { where: { id } });
     } else {
       const updatePayload = req.body.blogData;
-      const existedCategories = await Category.find({});
-      updatePayload.categories = await Utils.handleCategories(
-        existedCategories,
+      const requestedCategories = toLowerCaseArrayValues(
         updatePayload.categories
       );
-      result = await Blog.updateById(id, updatePayload);
+      delete updatePayload.categories;
+
+      const existedCategories = await Category.findAll({
+        where: {
+          name: {
+            [Op.in]: requestedCategories,
+          },
+        },
+        attributes: ['id', 'name'],
+      });
+      await handleCategories(existedCategories, requestedCategories, id);
+      await Blog.update(updatePayload, {
+        where: { id },
+      });
     }
+    result = await Blog.findAll({
+      where: {
+        id,
+        visibility: true,
+      },
+      include: [
+        {
+          model: Category,
+          attributes: ['name'],
+          through: {
+            attributes: [],
+          },
+        },
+      ],
+      raw: true,
+      nest: true,
+    });
+    result = result.map((row) => {
+      const _id = row.id;
+      delete row.id;
+      return {
+        _id,
+        ...row,
+      };
+    });
+    result = groupBlogsById(result);
     return res.status(OK).json({
       success: true,
       message: 'Blog updated successfully',
@@ -123,11 +228,18 @@ const updateBlog = async (req, res, next) => {
 const deleteBlog = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const blog = await Blog.findById(id);
+    const blog = await Blog.findOne({
+      where: {
+        id,
+      },
+      attributes: ['id'],
+    });
     if (!blog) {
       return next(new ErrorResponse('Blog not exist', NOT_FOUND));
     }
-    const result = await Blog.deleteById(id);
+    const result = await Blog.destroy({
+      where: { id },
+    });
     return res.status(OK).json({
       success: true,
       message: 'Blog deleted successfully',
