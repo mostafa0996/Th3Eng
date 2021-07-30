@@ -8,7 +8,7 @@ module.exports = {
         page: Joi.number(),
         limit: Joi.number(),
         text: Joi.string(),
-        type: Joi.number().valid(...Object.values(PRODUCT_TYPE)),
+        type: Joi.string().valid(...Object.values(PRODUCT_TYPE)),
         minPrice: Joi.number().min(1),
         maxPrice: Joi.number().min(1),
         tags: Joi.string(),
@@ -25,14 +25,10 @@ module.exports = {
         description: Joi.string().required(),
         screenshots: Joi.array().items(Joi.string()).min(1).required(),
         tags: Joi.array().items(Joi.string()).required(),
-        type: Joi.number()
+        type: Joi.string()
           .valid(...Object.values(PRODUCT_TYPE))
           .required(),
-        price: Joi.when('type', {
-          is: PRODUCT_TYPE.PAID,
-          then: Joi.number().required(),
-          otherwise: Joi.forbidden(),
-        }),
+        price: Joi.number().required(),
         version: Joi.string().optional(),
         file: Joi.string(),
       }),
@@ -61,14 +57,10 @@ module.exports = {
           description: Joi.string().required(),
           screenshots: Joi.array().items(Joi.string()).required(),
           tags: Joi.array().items(Joi.string()).min(1).required(),
-          type: Joi.number()
+          type: Joi.string()
             .valid(...Object.values(PRODUCT_TYPE))
             .required(),
-          price: Joi.when('type', {
-            is: PRODUCT_TYPE.PAID,
-            then: Joi.number().required(),
-            otherwise: Joi.forbidden(),
-          }),
+          price: Joi.number().required(),
           version: Joi.string().optional(),
           file: Joi.string(),
         }),

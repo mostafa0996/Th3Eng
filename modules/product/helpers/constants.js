@@ -1,6 +1,6 @@
 const PRODUCT_TYPE = {
-  FREE: 0,
-  PAID: 1,
+  FREE: '0',
+  PAID: '1',
 };
 
 const endPoints = Object.freeze({

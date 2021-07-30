@@ -237,7 +237,7 @@ const deleteBlog = async (req, res, next) => {
     if (!blog) {
       return next(new ErrorResponse('Blog not exist', NOT_FOUND));
     }
-    const result = await Blog.destroy({
+    await Blog.destroy({
       where: { id },
     });
     return res.status(OK).json({

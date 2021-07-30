@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const {Sequelize, DataTypes} = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const logger = require('../../config/logger');
 
 const basename = path.basename(__filename);
@@ -15,7 +15,14 @@ config.username = process.env.SQL_DB_USER_NAME || 'root';
 config.password = process.env.SQL_DB_USER_PASSWORD || '12345678';
 config.database = process.env.SQL_DB_NAME || 'local-eng';
 config.host = process.env.SQL_DB_HOST || '127.0.0.1';
-config.dialect = process.env.SQL_MYSQL_DIALECT || 'mysql';
+if (process.env.NODE_ENV == 'development') {
+  console.log(process.env.NODE_ENV);
+  config.dialect = 'sqlite';
+  config.storage = ':memory:';
+} else {
+  config.dialect = 'mysql';
+}
+
 config.pool = {
   max: 100,
   min: 0,
@@ -23,12 +30,16 @@ config.pool = {
   idle: 10000,
 };
 
-const sequelize = new Sequelize(config.database, config.username, config.password, config);
+const sequelize = new Sequelize(
+  config.database,
+  config.username,
+  config.password,
+  config
+);
 fs.readdirSync(__dirname)
   .filter(
-    (file) => file.indexOf('.') !== 0
-      && file !== basename
-      && (file.slice(-3) === '.js'),
+    (file) =>
+      file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js'
   )
   .forEach((file) => {
     // eslint-disable-next-line
@@ -44,7 +55,8 @@ Object.keys(db).forEach((modelName) => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-sequelize.sync()
+sequelize
+  .sync()
   .then(() => {
     logger.info('Sequelize is connecting Successfully');
   })
@@ -60,5 +72,5 @@ module.exports = {
   Tag: db.tags,
   Category: db.categories,
   Image: db.images,
-  Screenshot: db.screenshots
+  Screenshot: db.screenshots,
 };
