@@ -54,8 +54,17 @@ const sendHireDeveloperEmail = async (fromEmail, body) => {
   return _sendEmail('eng.ahmedfarag.a+1@gmail.com', subject, text);
 };
 
+const sendContactUsEmail = async (fromEmail, body, firstName, lastName) => {
+  const subject = `Contact us email from ${firstName} ${lastName}` ;
+  const text = `Thi request is from ${fromEmail}.
+  ${body}
+  `;
+  return _sendEmail('eng.ahmedfarag.a+1@gmail.com', subject, text);
+};
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendHireDeveloperEmail,
+  sendContactUsEmail
 };

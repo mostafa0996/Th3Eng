@@ -1,13 +1,31 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 const config = require('../../../common/config/configuration');
 
 class Utils {
-  static formatSearchOptions = (options) => {
-    const query = {};
-    if (options.role) query.roles = { $elemMatch: { $eq: options.role } };
-
-    return query;
+  static formatSearchOptions = (query) => {
+    const formattedQuery = {};
+    if (query.text && query.text != '') {
+      formattedQuery[Op.or] = [
+        {
+          firstName: { [Op.like]: `%${query.text}%` },
+        },
+        {
+          lastName: { [Op.like]: `%${query.text}%` },
+        },
+        {
+          phoneNumber: { [Op.like]: `%${query.text}%` },
+        },
+        {
+          email: { [Op.like]: `%${query.text}%` },
+        },
+        {
+          country: { [Op.like]: `%${query.text}%` },
+        },
+      ];
+    }
+    return formattedQuery;
   };
 
   static validatePassword = (enteredPassword, password) => {

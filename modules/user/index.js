@@ -17,7 +17,8 @@ const {
   updateUser,
   deleteUser,
   exportUsers,
-  sendHireDeveloperEmail
+  sendHireDeveloperEmail,
+  sendContactUsEmail
 } = require('./controller/index');
 
 const {
@@ -127,6 +128,11 @@ router.post(
   '/hire',
   isAuthorized(USER_HIRE_DEVELOPER),
   sendHireDeveloperEmail
+);
+
+router.post(
+  '/contact',
+  sendContactUsEmail
 );
 
 module.exports = router;

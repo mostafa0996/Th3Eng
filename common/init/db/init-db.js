@@ -16,7 +16,6 @@ config.password = process.env.SQL_DB_USER_PASSWORD || '12345678';
 config.database = process.env.SQL_DB_NAME || 'local-eng';
 config.host = process.env.SQL_DB_HOST || '127.0.0.1';
 if (process.env.NODE_ENV == 'development') {
-  console.log(process.env.NODE_ENV);
   config.dialect = 'sqlite';
   config.storage = ':memory:';
 } else {

@@ -238,7 +238,9 @@ const getAllUsers = async (req, res, next) => {
     const limit = Number(req.query.limit) || PAGE_LIMIT;
     const offset = limit * page - limit;
     delete req.query.page;
+    const whereClause = formatSearchOptions(req.query)
     const { rows, count } = await User.findAndCountAll({
+      where: whereClause,
       raw: true,
       limit: parseInt(limit, 10),
       offset: parseInt(offset, 10),
@@ -391,6 +393,23 @@ const sendHireDeveloperEmail = async (req, res, next) => {
   }
 };
 
+const sendContactUsEmail = async (req, res, next) => {
+  try {
+    const { firstName, lastName, email, message } = req.body;
+    EmailService.sendContactUsEmail(email, message, firstName, lastName);
+    return res.status(OK).json({
+      success: true,
+      message: 'Email sent successfully',
+      data: null,
+    });
+  } catch (error) {
+    logger.error('Error get user', error.message);
+    next(
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+    );
+  }
+};
+
 module.exports = {
   login,
   signUp,
@@ -405,4 +424,5 @@ module.exports = {
   deleteUser,
   exportUsers,
   sendHireDeveloperEmail,
+  sendContactUsEmail
 };
