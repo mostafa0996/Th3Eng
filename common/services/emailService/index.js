@@ -24,26 +24,39 @@ const _sendEmail = async (email, subject, text) => {
   );
 };
 
+const _sendHtmlEmail = async (email, subject, html) => {
+  const msg = {
+    to: email,
+    from: 'eng.ahmedfarag.a@gmail.com',
+    subject: subject,
+    html,
+  };
+
+  sgMail.send(msg).then(
+    (result) => {
+      logger.info(JSON.stringify(result, null, 2));
+    },
+    (error) => {
+      if (error.response) {
+        logger.error(JSON.stringify(error.response.body));
+        throw new Error(JSON.stringify(error.response.body));
+      }
+    }
+  );
+};
+
 const sendVerificationEmail = async (token, name, email) => {
   const subject = 'The Eng Verification';
-
-  // todo: front end make email template that has a clickable button routes to our frontend.
-  const text = `Hello ${name},
-                Please verify you account through this link
-                http://localhost:3000/home/Verification/${token}
-                Thanks`;
-  return _sendEmail(email, subject, text);
+  const verificationLink = `http://localhost:3000/home/Verification/${token}`;
+  const html = require('./templates/verifyEmail')(verificationLink);
+  return _sendHtmlEmail(email, subject, html);
 };
 
 const sendPasswordResetEmail = async (token, name, email) => {
   const subject = 'The Eng Password Reset';
-
-  // todo: front end make email template that has a clickable button routes to our frontend.
-  const text = `Hello ${name},
-                Please reset your password through this link
-                http://localhost:3000/home/NewPassword/${token}
-                Thanks`;
-  return _sendEmail(email, subject, text);
+  const resetLink = `http://localhost:3000/home/NewPassword/${token}`;
+  const html = require('./templates/resetPassword')(resetLink, name);
+  return _sendHtmlEmail(email, subject, html);
 };
 
 const sendHireDeveloperEmail = async (fromEmail, body) => {
@@ -55,7 +68,7 @@ const sendHireDeveloperEmail = async (fromEmail, body) => {
 };
 
 const sendContactUsEmail = async (fromEmail, body, firstName, lastName) => {
-  const subject = `Contact us email from ${firstName} ${lastName}` ;
+  const subject = `Contact us email from ${firstName} ${lastName}`;
   const text = `Thi request is from ${fromEmail}.
   ${body}
   `;
@@ -66,5 +79,5 @@ module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendHireDeveloperEmail,
-  sendContactUsEmail
+  sendContactUsEmail,
 };
