@@ -12,7 +12,7 @@ const config = {};
 const db = {};
 
 config.username = process.env.SQL_DB_USER_NAME || 'root';
-config.password = process.env.SQL_DB_USER_PASSWORD || '12345678';
+config.password = process.env.SQL_DB_USER_PASSWORD || '123456';
 config.database = process.env.SQL_DB_NAME || 'local-eng';
 config.host = process.env.SQL_DB_HOST || '127.0.0.1';
 if (process.env.NODE_ENV == 'development') {
