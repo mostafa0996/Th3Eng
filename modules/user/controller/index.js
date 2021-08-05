@@ -64,14 +64,9 @@ const login = async (req, res, next) => {
       data: { user, token: data.token },
     });
   } catch (error) {
-    const errors = error.errors.map((e) => e.message);
-    logger.error('Error while login ', errors || error.message);
-    next(
-      new ErrorResponse(
-        errors || error.message,
-        error.status || INTERNAL_SERVER_ERROR
-      )
-    );
+    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    logger.error('Error while login ', errors);
+    next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -116,14 +111,9 @@ const signUp = async (req, res, next) => {
       .status(CREATED)
       .json({ success: true, message: 'User Created', data: user });
   } catch (error) {
-    const errors = error.errors.map((e) => e.message);
-    logger.error('Error while signup ', errors || error.message);
-    next(
-      new ErrorResponse(
-        errors || error.message,
-        error.status || INTERNAL_SERVER_ERROR
-      )
-    );
+    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    logger.error('Error while signup ', errors);
+    next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -132,7 +122,7 @@ const verifyUser = async (req, res, next) => {
     const { token } = req.body;
     const selector = {
       verificationToken: token,
-      verificationTokenExpiration: { $gt: new Date() },
+      verificationTokenExpiration: { [Op.gte]: new Date() },
     };
     const user = await User.findOne({
       where: selector,
@@ -153,14 +143,9 @@ const verifyUser = async (req, res, next) => {
       data: null,
     });
   } catch (error) {
-    const errors = error.errors.map((e) => e.message);
-    logger.error('Error while verifing user ', errors || error.message);
-    next(
-      new ErrorResponse(
-        errors || error.message,
-        error.status || INTERNAL_SERVER_ERROR
-      )
-    );
+    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    logger.error('Error while verifing user ', errors);
+    next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -200,17 +185,9 @@ const forgotPassword = async (req, res, next) => {
       data: null,
     });
   } catch (error) {
-    const errors = error.errors.map((e) => e.message);
-    logger.error(
-      'Error creating reset password token ',
-      errors || error.message
-    );
-    next(
-      new ErrorResponse(
-        errors || error.message,
-        error.status || INTERNAL_SERVER_ERROR
-      )
-    );
+    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    logger.error('Error creating reset password token ', errors);
+    next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -221,7 +198,7 @@ const resetPassword = async (req, res, next) => {
     const salt = await bcrypt.genSalt(+config.salt);
     const selector = {
       resetPasswordToken: token,
-      resetPasswordExpiration: { [Op.gt]: new Date() },
+      resetPasswordExpiration: { [Op.gte]: new Date() },
     };
     const user = await User.findOne({
       where: selector,
@@ -244,14 +221,9 @@ const resetPassword = async (req, res, next) => {
       data: null,
     });
   } catch (error) {
-    const errors = error.errors.map((e) => e.message);
-    logger.error('Error resetting user password ', errors || error.message);
-    next(
-      new ErrorResponse(
-        errors || error.message,
-        error.status || INTERNAL_SERVER_ERROR
-      )
-    );
+    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    logger.error('Error resetting user password ', errors);
+    next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -284,14 +256,9 @@ const getAllUsers = async (req, res, next) => {
       data: users,
     });
   } catch (error) {
-    const errors = error.errors.map((e) => e.message);
-    logger.error('Error get all users ', errors || error.message);
-    next(
-      new ErrorResponse(
-        errors || error.message,
-        error.status || INTERNAL_SERVER_ERROR
-      )
-    );
+    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    logger.error('Error get all users ', errors);
+    next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -311,14 +278,9 @@ const getUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    const errors = error.errors.map((e) => e.message);
-    logger.error('Error get user', errors || error.message);
-    next(
-      new ErrorResponse(
-        errors || error.message,
-        error.status || INTERNAL_SERVER_ERROR
-      )
-    );
+    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    logger.error('Error get user', errors);
+    next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -351,14 +313,9 @@ const updateUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    logger.error('Error update user ', errors || error.message);
-    const errors = error.errors.map((e) => e.message);
-    next(
-      new ErrorResponse(
-        errors || error.message,
-        error.status || INTERNAL_SERVER_ERROR
-      )
-    );
+    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    logger.error('Error update user ', errors);
+    next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -374,14 +331,9 @@ const deleteUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    const errors = error.errors.map((e) => e.message);
-    logger.error('Error delete user ', errors || error.message);
-    next(
-      new ErrorResponse(
-        errors || error.message,
-        error.status || INTERNAL_SERVER_ERROR
-      )
-    );
+    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    logger.error('Error delete user ', errors);
+    next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -399,14 +351,9 @@ const exportUsers = async (req, res, next) => {
     );
     return res.status(OK).send(result);
   } catch (error) {
-    const errors = error.errors.map((e) => e.message);
-    logger.error('Error delete user ', errors || error.message);
-    next(
-      new ErrorResponse(
-        errors || error.message,
-        error.status || INTERNAL_SERVER_ERROR
-      )
-    );
+    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    logger.error('Error delete user ', errors);
+    next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -429,14 +376,9 @@ const sendHireDeveloperEmail = async (req, res, next) => {
       data: null,
     });
   } catch (error) {
-    const errors = error.errors.map((e) => e.message);
-    logger.error('Error get user', errors || error.message);
-    next(
-      new ErrorResponse(
-        errors || error.message,
-        error.status || INTERNAL_SERVER_ERROR
-      )
-    );
+    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    logger.error('Error get user', errors);
+    next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
 };
 
