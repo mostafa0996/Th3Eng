@@ -140,7 +140,7 @@ const getBlog = async (req, res, next) => {
     return res.status(OK).json({
       success: true,
       message: 'Blog loaded successfully',
-      data: blog,
+      data: blog[0],
     });
   } catch (error) {
     logger.error('Error get blog ', error.message);
@@ -215,7 +215,7 @@ const updateBlog = async (req, res, next) => {
     return res.status(OK).json({
       success: true,
       message: 'Blog updated successfully',
-      data: result,
+      data: result[0],
     });
   } catch (error) {
     logger.error('Error update blog ', error.message);
@@ -243,7 +243,7 @@ const deleteBlog = async (req, res, next) => {
     return res.status(OK).json({
       success: true,
       message: 'Blog deleted successfully',
-      data: result,
+      data: blog,
     });
   } catch (error) {
     logger.error('Error delete blog ', error.message);

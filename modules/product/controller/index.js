@@ -140,7 +140,7 @@ const getProduct = async (req, res, next) => {
     return res.status(OK).json({
       success: true,
       message: 'Product loaded successfully',
-      data: product,
+      data: product[0],
     });
   } catch (error) {
     logger.error('Error get product ', error.message);
@@ -215,7 +215,7 @@ const updateProduct = async (req, res, next) => {
     return res.status(OK).json({
       success: true,
       message: 'Product updated successfully',
-      data: result,
+      data: result[0],
     });
   } catch (error) {
     logger.error('Error update product ', error.message);
