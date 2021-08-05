@@ -64,9 +64,13 @@ const login = async (req, res, next) => {
       data: { user, token: data.token },
     });
   } catch (error) {
-    logger.error('Error while login ', error.message);
+    const errors = error.errors.map((e) => e.message);
+    logger.error('Error while login ', errors || error.message);
     next(
-      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+      new ErrorResponse(
+        errors || error.message,
+        error.status || INTERNAL_SERVER_ERROR
+      )
     );
   }
 };
@@ -112,9 +116,13 @@ const signUp = async (req, res, next) => {
       .status(CREATED)
       .json({ success: true, message: 'User Created', data: user });
   } catch (error) {
-    logger.error('Error while signup ', error.message);
+    const errors = error.errors.map((e) => e.message);
+    logger.error('Error while signup ', errors || error.message);
     next(
-      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+      new ErrorResponse(
+        errors || error.message,
+        error.status || INTERNAL_SERVER_ERROR
+      )
     );
   }
 };
@@ -145,9 +153,13 @@ const verifyUser = async (req, res, next) => {
       data: null,
     });
   } catch (error) {
-    logger.error('Error while verifing user ', error.message);
+    const errors = error.errors.map((e) => e.message);
+    logger.error('Error while verifing user ', errors || error.message);
     next(
-      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+      new ErrorResponse(
+        errors || error.message,
+        error.status || INTERNAL_SERVER_ERROR
+      )
     );
   }
 };
@@ -188,9 +200,16 @@ const forgotPassword = async (req, res, next) => {
       data: null,
     });
   } catch (error) {
-    logger.error('Error creating reset password token ', error.message);
+    const errors = error.errors.map((e) => e.message);
+    logger.error(
+      'Error creating reset password token ',
+      errors || error.message
+    );
     next(
-      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+      new ErrorResponse(
+        errors || error.message,
+        error.status || INTERNAL_SERVER_ERROR
+      )
     );
   }
 };
@@ -225,9 +244,13 @@ const resetPassword = async (req, res, next) => {
       data: null,
     });
   } catch (error) {
-    logger.error('Error resetting user password ', error.message);
+    const errors = error.errors.map((e) => e.message);
+    logger.error('Error resetting user password ', errors || error.message);
     next(
-      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+      new ErrorResponse(
+        errors || error.message,
+        error.status || INTERNAL_SERVER_ERROR
+      )
     );
   }
 };
@@ -238,7 +261,7 @@ const getAllUsers = async (req, res, next) => {
     const limit = Number(req.query.limit) || PAGE_LIMIT;
     const offset = limit * page - limit;
     delete req.query.page;
-    const whereClause = formatSearchOptions(req.query)
+    const whereClause = formatSearchOptions(req.query);
     const { rows, count } = await User.findAndCountAll({
       where: whereClause,
       raw: true,
@@ -261,9 +284,13 @@ const getAllUsers = async (req, res, next) => {
       data: users,
     });
   } catch (error) {
-    logger.error('Error get all users ', error.message);
+    const errors = error.errors.map((e) => e.message);
+    logger.error('Error get all users ', errors || error.message);
     next(
-      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+      new ErrorResponse(
+        errors || error.message,
+        error.status || INTERNAL_SERVER_ERROR
+      )
     );
   }
 };
@@ -284,9 +311,13 @@ const getUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    logger.error('Error get user', error.message);
+    const errors = error.errors.map((e) => e.message);
+    logger.error('Error get user', errors || error.message);
     next(
-      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+      new ErrorResponse(
+        errors || error.message,
+        error.status || INTERNAL_SERVER_ERROR
+      )
     );
   }
 };
@@ -320,9 +351,13 @@ const updateUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    logger.error('Error update user ', error.message);
+    logger.error('Error update user ', errors || error.message);
+    const errors = error.errors.map((e) => e.message);
     next(
-      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+      new ErrorResponse(
+        errors || error.message,
+        error.status || INTERNAL_SERVER_ERROR
+      )
     );
   }
 };
@@ -339,9 +374,13 @@ const deleteUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    logger.error('Error delete user ', error.message);
+    const errors = error.errors.map((e) => e.message);
+    logger.error('Error delete user ', errors || error.message);
     next(
-      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+      new ErrorResponse(
+        errors || error.message,
+        error.status || INTERNAL_SERVER_ERROR
+      )
     );
   }
 };
@@ -360,9 +399,13 @@ const exportUsers = async (req, res, next) => {
     );
     return res.status(OK).send(result);
   } catch (error) {
-    logger.error('Error delete user ', error.message);
+    const errors = error.errors.map((e) => e.message);
+    logger.error('Error delete user ', errors || error.message);
     next(
-      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+      new ErrorResponse(
+        errors || error.message,
+        error.status || INTERNAL_SERVER_ERROR
+      )
     );
   }
 };
@@ -386,9 +429,13 @@ const sendHireDeveloperEmail = async (req, res, next) => {
       data: null,
     });
   } catch (error) {
-    logger.error('Error get user', error.message);
+    const errors = error.errors.map((e) => e.message);
+    logger.error('Error get user', errors || error.message);
     next(
-      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+      new ErrorResponse(
+        errors || error.message,
+        error.status || INTERNAL_SERVER_ERROR
+      )
     );
   }
 };
@@ -424,5 +471,5 @@ module.exports = {
   deleteUser,
   exportUsers,
   sendHireDeveloperEmail,
-  sendContactUsEmail
+  sendContactUsEmail,
 };
