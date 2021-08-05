@@ -31,7 +31,7 @@ const {
 
 router.get(
   '/',
-    isAuthorized(BLOG_GET_ALL_BLOGS),
+    // isAuthorized(BLOG_GET_ALL_BLOGS),
   validateRequest(getAllBlogsSchema),
   getAllBlogs
 );
@@ -45,7 +45,7 @@ router.post(
 
 router.get(
   '/:id',
-    isAuthorized(BLOG_GET_BLOG),
+    // isAuthorized(BLOG_GET_BLOG),
   validateRequest(getBlogSchema),
   getBlog
 );

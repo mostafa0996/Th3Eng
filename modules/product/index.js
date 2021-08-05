@@ -32,7 +32,7 @@ const {
 
 router.get(
   '/',
-  isAuthorized(PRODUCT_GET_ALL_PRODUCTS),
+  // isAuthorized(PRODUCT_GET_ALL_PRODUCTS),
   validateRequest(getAllProductsSchema),
   getAllProducts
 );
@@ -46,7 +46,7 @@ router.post(
 
 router.get(
   '/:id',
-  isAuthorized(PRODUCT_GET_PRODUCT),
+  // isAuthorized(PRODUCT_GET_PRODUCT),
   validateRequest(getProductSchema),
   getProduct
 );
