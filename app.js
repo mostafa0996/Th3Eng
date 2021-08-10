@@ -96,6 +96,11 @@ app.use(passport.initialize());
 // Initialize app
 initApp(app);
 
+
+app.get('/', (req, res) => {
+  res.send("Th3Eng Backend Server")
+})
+
 app.listen(config.port, () => {
   console.log(`backend is up & running on port ${config.port}`);
 });

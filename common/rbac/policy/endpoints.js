@@ -1,5 +1,45 @@
-const { BLOG_CREATE_BLOG } = require('../../../modules/blog/helpers/constants');
+const {
+  BLOG_CREATE_BLOG,
+  BLOG_GET_ALL_BLOGS,
+  BLOG_GET_BLOG,
+  BLOG_DELETE_BLOG,
+  BLOG_UPDATE_BLOG,
+} = require('../../../modules/blog/helpers/constants');
+
+const {
+  endPoints: {
+    PRODUCT_CREATE_PRODUCT,
+    PRODUCT_DELETE_PRODUCT,
+    PRODUCT_GET_ALL_PRODUCTS,
+    PRODUCT_GET_PRODUCT,
+    PRODUCT_UPDATE_PRODUCT,
+  },
+} = require('../../../modules/product/helpers/constants');
+
+const {
+  USER_DELETE_USER,
+  USER_EXPORT_USERS,
+  USER_GET_ALL_USERS,
+  USER_GET_USER,
+  USER_HIRE_DEVELOPER,
+  USER_UPDATE_USER,
+} = require('../../../modules/user/helpers/constants');
 
 module.exports = {
   BLOG_CREATE_BLOG,
+  BLOG_GET_ALL_BLOGS,
+  BLOG_GET_BLOG,
+  BLOG_DELETE_BLOG,
+  BLOG_UPDATE_BLOG,
+  PRODUCT_CREATE_PRODUCT,
+  PRODUCT_DELETE_PRODUCT,
+  PRODUCT_GET_ALL_PRODUCTS,
+  PRODUCT_GET_PRODUCT,
+  PRODUCT_UPDATE_PRODUCT,
+  USER_DELETE_USER,
+  USER_EXPORT_USERS,
+  USER_GET_ALL_USERS,
+  USER_GET_USER,
+  USER_HIRE_DEVELOPER,
+  USER_UPDATE_USER,
 };
