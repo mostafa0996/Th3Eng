@@ -88,7 +88,7 @@ const signUp = async (req, res, next) => {
     const user = await User.create(payload);
 
     const verificationToken = jwt.sign(
-      { _id: user._id, type: 'Verify' },
+      { id: user.id, type: 'Verify' },
       config.jwt.key,
       {
         algorithm: 'HS256',
@@ -162,7 +162,7 @@ const forgotPassword = async (req, res, next) => {
       throw new Error('Invalid Email Address');
     }
     const resetPasswordToken = jwt.sign(
-      { _id: user._id, type: 'Verify' },
+      { id: user.id, type: 'Verify' },
       config.jwt.key,
       {
         algorithm: 'HS256',
@@ -287,9 +287,9 @@ const getUser = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const userId = req.params.id;
-    const loggedInUser = req.user._id;
+    const loggedInUser = req.user.id;
     const payload = req.body;
-    const updatePayload = { _id: userId };
+    const updatePayload = { id: userId };
     if (userId == loggedInUser) {
       updatePayload.firstName = payload.firstName;
       updatePayload.lastName = payload.lastName;
@@ -305,7 +305,7 @@ const updateUser = async (req, res, next) => {
       updatePayload.role = payload.role;
       updatePayload.vip = payload.vip;
     }
-    await User.update(updatePayload, { where: { id: user.id } });
+    await User.update(updatePayload, { where: { id: userId } });
 
     return res.status(OK).json({
       success: true,
@@ -359,7 +359,7 @@ const exportUsers = async (req, res, next) => {
 
 const sendHireDeveloperEmail = async (req, res, next) => {
   try {
-    const id = req.user._id;
+    const id = req.user.id;
     const user = await User.findOne({
       where: { id },
       raw: true,

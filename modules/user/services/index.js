@@ -8,7 +8,7 @@ const _formatXlsxObject = async (users) => {
   const formattedUers = [];
   users.map((user) => {
     const fields = {};
-    fields['User ID'] = JSON.stringify(user._id);
+    fields['User ID'] = JSON.stringify(user.id);
     fields['Name'] = user.fullName;
     fields['Email'] = user.email;
     fields['Country'] = user.country;

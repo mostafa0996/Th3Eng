@@ -11,7 +11,7 @@ module.exports = async (req, res, next) => {
   try {
     const user = await User.findOne({
       where: {
-        id: req.user._id,
+        id: req.user.id,
       },
     });
     const data = user.toAuthJSON();
