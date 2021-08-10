@@ -4,6 +4,7 @@ const {
     PRODUCT_GET_ALL_PRODUCTS,
     PRODUCT_GET_PRODUCT,
     USER_GET_USER,
+    USER_HIRE_DEVELOPER
   } = require('./endpoints');
   
   module.exports = {
