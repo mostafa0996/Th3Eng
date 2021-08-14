@@ -37,11 +37,7 @@ const createProduct = async (req, res, next) => {
       },
       attributes: ['id', 'name'],
     });
-    await handleTags(
-      existedTags,
-      requestedTags,
-      createdProduct.id
-    );
+    await handleTags(existedTags, requestedTags, createdProduct.id);
     createdProduct.dataValues.tags = requestedTags;
     return res.status(CREATED).json({
       success: true,
@@ -63,9 +59,7 @@ const getAllProducts = async (req, res, next) => {
     const offset = limit * page - limit;
     delete req.query.page;
 
-    const { formattedQuery, tagFormattedQuery } = formatSearchQuery(
-      req.query
-    );
+    const { formattedQuery, tagFormattedQuery } = formatSearchQuery(req.query);
     const { rows, count } = await Product.findAndCountAll({
       where: { ...formattedQuery, visibility: true },
       distinct: true,
@@ -137,6 +131,41 @@ const getProduct = async (req, res, next) => {
     product = formatResult(product);
     product = groupProductsById(product);
 
+    const tags = product[0].tags;
+    if (tags && tags.length > 0) {
+      product[0].relatedProducts = await Product.findAll({
+        where: {
+          id: {
+            [Op.ne]: id,
+          },
+        },
+        distinct: true,
+        include: [
+          {
+            model: Tag,
+            where: {
+              name: {
+                [Op.in]: tags,
+              },
+            },
+            attributes: ['name'],
+            through: {
+              attributes: [],
+            },
+          },
+          {
+            model: Screenshot,
+            attributes: ['image'],
+          },
+        ],
+        raw: true,
+        nest: true,
+      });
+    }
+
+    product[0].relatedProducts = formatResult(product[0].relatedProducts);
+    product[0].relatedProducts = groupProductsById(product[0].relatedProducts);
+
     return res.status(OK).json({
       success: true,
       message: 'Product loaded successfully',
@@ -168,9 +197,7 @@ const updateProduct = async (req, res, next) => {
       await Product.update(updatedPayload, { where: { id } });
     } else {
       const updatePayload = req.body.productData;
-      const requestedTags = toLowerCaseArrayValues(
-        updatePayload.categories
-      );
+      const requestedTags = toLowerCaseArrayValues(updatePayload.categories);
       delete updatePayload.categories;
 
       const existedTags = await Category.findAll({
