@@ -47,7 +47,7 @@ class Utils {
         },
         {
           tags: { [Op.like]: `%${query.text}%` },
-        }
+        },
       ];
     }
     if (query.type) {
@@ -65,8 +65,8 @@ class Utils {
         : { [Op.lte]: Number(query.maxPrice) };
     }
 
-    if (query.tags) {
-      formattedQuery.tags = { [Op.like]: `%${query.tags.replace(/ /g,"")}%` };
+    if (query.tags && query.tags != '') {
+      formattedQuery.tags = { [Op.like]: `%${query.tags.replace(/ /g, '')}%` };
     }
 
     return { formattedQuery };
