@@ -150,10 +150,10 @@ const updateProduct = async (req, res, next) => {
         raw: true,
       });
       updatedPayload.tags = await handleTags(existedTags, requestedTags);
+      updatedPayload.screenshots = updatedPayload.screenshots.join();
       await Product.update(updatedPayload, {
         where: { id },
       });
-      updatedPayload.screenshots = updatedPayload.screenshots.join();
     }
     result = await Product.findAll({
       where: {
