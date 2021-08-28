@@ -87,6 +87,16 @@ class Utils {
         ...row,
       };
     });
+
+  static handleImages = (base64Images) => {
+    return base64Images.map((image) => ({
+      uniqueId: generateUniqueId({
+        length: 32,
+        useLetters: false,
+      }),
+      value: image,
+    }));
+  };
 }
 
 module.exports = Utils;

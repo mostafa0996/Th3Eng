@@ -30,6 +30,7 @@
     "firebase": "^7.15.4",
     "firebase-admin": "^8.12.1",
     "form-data": "^4.0.0",
+    "generate-unique-id": "^2.0.1",
     "hbs": "^4.1.1",
     "helmet": "^3.22.0",
     "hpp": "^0.2.3",

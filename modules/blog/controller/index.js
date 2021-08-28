@@ -12,18 +12,24 @@ const { Op } = require('sequelize');
 const logger = require('../../../common/config/logger');
 const { PAGE_LIMIT } = require('../../../common/constants');
 const ErrorResponse = require('../../../common/utils/errorResponse');
-const { Blog, Category } = require('../../../common/init/db/init-db');
+const {
+  Blog,
+  Category,
+  sequelize,
+  Image,
+} = require('../../../common/init/db/init-db');
 const {
   handleCategories,
   formatSearchQuery,
   formatResult,
+  handleImages,
+  handleGetImagesValue,
 } = require('../helpers/utils');
 const toLowerCaseArrayValues = require('../../../common/utils/toLowerCaseArrayValues');
 
 const createBlog = async (req, res, next) => {
   try {
     const payload = req.body;
-    payload.images = payload.images.join();
     const requestedCategories = toLowerCaseArrayValues(payload.categories);
     const existedCategories = await Category.findAll({
       where: {},
@@ -34,14 +40,25 @@ const createBlog = async (req, res, next) => {
       existedCategories,
       requestedCategories
     );
-    const createdBlog = await Blog.create(payload);
+
+    const images = await handleImages(payload.images);
+    payload.images = images.map((img) => img.uniqueId).join();
+    let createdBlog;
+    await sequelize.transaction(async (t) => {
+      await Image.bulkCreate(images, { transaction: t });
+      createdBlog = await Blog.create(payload);
+    });
+
     let result = await Blog.findAll({
       where: {
         id: createdBlog.id,
       },
       raw: true,
     });
+
+    result = await handleGetImagesValue(result);
     result = formatResult(result);
+
     return res.status(CREATED).json({
       success: true,
       message: 'Blog created successfully',
@@ -70,7 +87,9 @@ const getAllBlogs = async (req, res, next) => {
       offset: parseInt(offset, 10),
     });
 
-    const blogs = formatResult(rows);
+    let blogs = await handleGetImagesValue(rows);
+
+    blogs = formatResult(blogs);
     return res.status(OK).json({
       success: true,
       message: 'Blogs loaded successfully',
@@ -99,6 +118,7 @@ const getBlog = async (req, res, next) => {
     if (!blog.length) {
       return next(new ErrorResponse('Blog not exist', NOT_FOUND));
     }
+    blog = await handleGetImagesValue(blog);
     blog = formatResult(blog);
 
     return res.status(OK).json({
@@ -144,9 +164,13 @@ const updateBlog = async (req, res, next) => {
         existedCategories,
         requestedCategories
       );
-      updatedPayload.images = updatedPayload.images.join();
-      await Blog.update(updatedPayload, {
-        where: { id },
+      const images = await handleImages(updatedPayload.images);
+      updatedPayload.images = images.map((img) => img.uniqueId).join();
+      await sequelize.transaction(async (t) => {
+        await Image.bulkCreate(images, { transaction: t });
+        await Blog.update(updatedPayload, {
+          where: { id },
+        });
       });
     }
     result = await Blog.findAll({
@@ -155,6 +179,7 @@ const updateBlog = async (req, res, next) => {
       },
       raw: true,
     });
+    result = await handleGetImagesValue(result);
     result = formatResult(result);
     return res.status(OK).json({
       success: true,

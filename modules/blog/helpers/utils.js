@@ -1,9 +1,10 @@
 const { INTERNAL_SERVER_ERROR } = require('http-status-codes');
 const _ = require('lodash');
-const { Category } = require('../../../common/init/db/init-db');
+const { Category, Image } = require('../../../common/init/db/init-db');
 const ErrorResponse = require('../../../common/utils/errorResponse');
 const { Op } = require('sequelize');
 const { roles } = require('../../../common/enum/roles');
+const generateUniqueId = require('generate-unique-id');
 
 class Utils {
   static handleCategories = async (existedCategories, requestedCategories) => {
@@ -52,7 +53,9 @@ class Utils {
     }
 
     if (query.categories) {
-      formattedQuery.categories = { [Op.like]: `%${query.categories.replace(/ /g,"")}%` };
+      formattedQuery.categories = {
+        [Op.like]: `%${query.categories.replace(/ /g, '')}%`,
+      };
     }
 
     return { formattedQuery };
@@ -61,18 +64,46 @@ class Utils {
   static formatResult = (blogs) =>
     blogs.map((row) => {
       const _id = row.id;
-      const images = row.images.split(',');
       const categories = row.categories.split(',');
       delete row.id;
-      delete row.images;
       delete row.categories;
       return {
         _id,
-        images,
         categories,
         ...row,
       };
     });
+
+  static handleImages = (base64Images) => {
+    return base64Images.map((image) => ({
+      uniqueId: generateUniqueId({
+        length: 8,
+        useLetters: false,
+      }),
+      value: image,
+    }));
+  };
+
+  static handleGetImagesValue = async (rows) => {
+    const result = [];
+    for (const row of rows) {
+      const obj = {
+        ...row,
+      };
+      let images = await Image.findAll({
+        where: {
+          uniqueId: {
+            [Op.in]: row.images.split(','),
+          },
+        },
+        attributes: ['value'],
+        raw: true,
+      });
+      obj.images = images.map((img) => img.value);
+      result.push(obj);
+    }
+    return result;
+  };
 }
 
 module.exports = Utils;

@@ -76,5 +76,4 @@ module.exports = {
   Tag: db.tags,
   Category: db.categories,
   Image: db.images,
-  Screenshot: db.screenshots,
 };
