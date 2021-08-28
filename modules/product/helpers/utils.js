@@ -1,41 +1,28 @@
 const { INTERNAL_SERVER_ERROR } = require('http-status-codes');
 const _ = require('lodash');
-const { Tag, Screenshot } = require('../../../common/init/db/init-db');
+const { Tag } = require('../../../common/init/db/init-db');
 const ErrorResponse = require('../../../common/utils/errorResponse');
 const { Op } = require('sequelize');
+const { roles } = require('../../../common/enum/roles');
+
 class Utils {
-  static handleTags = async (
-    existedTags,
-    requestedTags,
-    productId
-  ) => {
+  static handleTags = async (existedTags, requestedTags) => {
     try {
-      //get all categoriesName
+      //get all tagsName
       const existedTagsNames = existedTags.map((ele) => ele.name);
 
-      //convert categories to lowercase
-      requestedTags = requestedTags.map((cat) => cat.toLowerCase());
+      //convert tags to lowercase
+      requestedTags = requestedTags.map((tag) => tag.toLowerCase());
 
-      // find not existed categories to create them
-      let notexistedTags = _.difference(
-        requestedTags,
-        existedTagsNames
-      );
+      // find not existed tags to create them
+      let notexistedTags = _.difference(requestedTags, existedTagsNames);
       notexistedTags = notexistedTags.map((ele) => ({ name: ele }));
 
       if (notexistedTags) {
-        notexistedTags.forEach(async (ele) => {
-          const tag = await Tag.create(ele);
-          tag.addProduct(productId, tag.id);
-        });
-      }
-      if (existedTags) {
-        existedTags.forEach(async (tag) => {
-          await tag.addProduct(productId, tag.id);
-        });
+        await Tag.bulkCreate(notexistedTags);
       }
 
-      return requestedTags;
+      return requestedTags.join(',');
     } catch (error) {
       throw new ErrorResponse(error.message, INTERNAL_SERVER_ERROR);
     }
@@ -43,10 +30,12 @@ class Utils {
 
   static formatSearchQuery = (query) => {
     const formattedQuery = {};
-    const tagFormattedQuery = {};
+    if (user && user.role == roles.CUSTOMER) {
+      formattedQuery.visibility = true;
+    }
 
     if (query.text && query.text != '') {
-      formattedQuery[Op.or]  = [
+      formattedQuery[Op.or] = [
         {
           name: { [Op.like]: `%${query.text}%` },
         },
@@ -56,13 +45,16 @@ class Utils {
         {
           description: { [Op.like]: `%${query.text}%` },
         },
+        {
+          tags: { [Op.like]: `%${query.text}%` },
+        }
       ];
     }
     if (query.type) {
       formattedQuery.type = Number(query.type);
     }
     if (query.minPrice) {
-      formattedQuery.price = {[Op.gte]: Number(query.minPrice) };
+      formattedQuery.price = { [Op.gte]: Number(query.minPrice) };
     }
     if (query.maxPrice) {
       formattedQuery.price = formattedQuery.price
@@ -74,53 +66,24 @@ class Utils {
     }
 
     if (query.tags) {
-      const tags = query.tags.split(',');
-      tagFormattedQuery.name = { [Op.in]: tags };
+      formattedQuery.tags = { [Op.like]: `%${query.tags.replace(/ /g,"")}%` };
     }
 
-    return { formattedQuery, tagFormattedQuery };
-  };
-
-  static groupProductsById = (products) => {
-    const result = [];
-    const dictionary = {};
-    products.forEach((product) => {
-      dictionary[product._id] = [];
-    });
-    products.forEach((product) => {
-      dictionary[product._id].push(product.tags.name);
-    });
-    Object.keys(dictionary).forEach((ele) => {
-      products.forEach((product) => {
-        if (product._id == ele) {
-          result.push({ ...product, tags: dictionary[ele] });
-        }
-      });
-    });
-    return result.filter(
-      (v, i, a) => a.findIndex((t) => t._id === v._id) === i
-    );
-  };
-
-  static handleScreenshots = async (screenshots, productId) => {
-    screenshots.forEach(async (image) => {
-      const payload = {
-        image,
-        productId,
-      };
-      await Screenshot.create(payload);
-    });
+    return { formattedQuery };
   };
 
   static formatResult = (products) =>
     products.map((row) => {
       const _id = row.id;
-      const screenshots = Object.values(row.screenshots);
-      delete row.screenshots;
+      const screenshots = row.screenshots.split(',');
+      const tags = row.tags.split(',');
       delete row.id;
+      delete row.screenshots;
+      delete row.tags;
       return {
         _id,
         screenshots,
+        tags,
         ...row,
       };
     });

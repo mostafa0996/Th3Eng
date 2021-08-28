@@ -12,12 +12,10 @@ const { Op } = require('sequelize');
 const logger = require('../../../common/config/logger');
 const { PAGE_LIMIT } = require('../../../common/constants');
 const ErrorResponse = require('../../../common/utils/errorResponse');
-const { Product, Tag, Screenshot } = require('../../../common/init/db/init-db');
+const { Product, Tag } = require('../../../common/init/db/init-db');
 const {
   handleTags,
-  groupProductsById,
   formatSearchQuery,
-  handleScreenshots,
   formatResult,
 } = require('../helpers/utils');
 const toLowerCaseArrayValues = require('../../../common/utils/toLowerCaseArrayValues');
@@ -25,24 +23,26 @@ const toLowerCaseArrayValues = require('../../../common/utils/toLowerCaseArrayVa
 const createProduct = async (req, res, next) => {
   try {
     const payload = req.body;
+    payload.screenshots = payload.screenshots.join();
     const requestedTags = toLowerCaseArrayValues(payload.tags);
-    delete payload.tags;
-    const createdProduct = await Product.create(payload);
-    await handleScreenshots(payload.screenshots, createdProduct.id);
     const existedTags = await Tag.findAll({
-      where: {
-        name: {
-          [Op.in]: requestedTags,
-        },
-      },
-      attributes: ['id', 'name'],
+      where: {},
+      attributes: ['name'],
+      raw: true,
     });
-    await handleTags(existedTags, requestedTags, createdProduct.id);
-    createdProduct.dataValues.tags = requestedTags;
+    payload.tags = await handleTags(existedTags, requestedTags);
+    const createdProduct = await Product.create(payload);
+    let result = await Product.findAll({
+      where: {
+        id: createdProduct.id,
+      },
+      raw: true,
+    });
+    result = formatResult(result);
     return res.status(CREATED).json({
       success: true,
       message: 'Product created successfully',
-      data: createdProduct,
+      data: result[0],
     });
   } catch (error) {
     logger.error('Error create product: ', error.message);
@@ -59,32 +59,15 @@ const getAllProducts = async (req, res, next) => {
     const offset = limit * page - limit;
     delete req.query.page;
 
-    const { formattedQuery, tagFormattedQuery } = formatSearchQuery(req.query);
+    const { formattedQuery } = formatSearchQuery(req.query, req.user);
     const { rows, count } = await Product.findAndCountAll({
-      where: { ...formattedQuery, visibility: true },
-      distinct: true,
-      include: [
-        {
-          model: Tag,
-          where: tagFormattedQuery,
-          attributes: ['name'],
-          through: {
-            attributes: [],
-          },
-        },
-        {
-          model: Screenshot,
-          attributes: ['image'],
-        },
-      ],
+      where: formattedQuery,
       raw: true,
-      nest: true,
       limit: parseInt(limit, 10),
       offset: parseInt(offset, 10),
     });
 
-    let products = formatResult(rows);
-    products = groupProductsById(products);
+    const products = formatResult(rows);
     return res.status(OK).json({
       success: true,
       message: 'Products loaded successfully',
@@ -107,29 +90,13 @@ const getProduct = async (req, res, next) => {
     let product = await Product.findAll({
       where: {
         id,
-        visibility: true,
       },
-      include: [
-        {
-          model: Tag,
-          attributes: ['name'],
-          through: {
-            attributes: [],
-          },
-        },
-        {
-          model: Screenshot,
-          attributes: ['image'],
-        },
-      ],
       raw: true,
-      nest: true,
     });
     if (!product.length) {
       return next(new ErrorResponse('Product not exist', NOT_FOUND));
     }
     product = formatResult(product);
-    product = groupProductsById(product);
 
     const tags = product[0].tags;
     if (tags && tags.length > 0) {
@@ -139,33 +106,11 @@ const getProduct = async (req, res, next) => {
             [Op.ne]: id,
           },
         },
-        distinct: true,
-        include: [
-          {
-            model: Tag,
-            where: {
-              name: {
-                [Op.in]: tags,
-              },
-            },
-            attributes: ['name'],
-            through: {
-              attributes: [],
-            },
-          },
-          {
-            model: Screenshot,
-            attributes: ['image'],
-          },
-        ],
         raw: true,
-        nest: true,
       });
     }
 
     product[0].relatedProducts = formatResult(product[0].relatedProducts);
-    product[0].relatedProducts = groupProductsById(product[0].relatedProducts);
-
     return res.status(OK).json({
       success: true,
       message: 'Product loaded successfully',
@@ -197,18 +142,14 @@ const updateProduct = async (req, res, next) => {
       await Product.update(updatedPayload, { where: { id } });
     } else {
       const updatePayload = req.body.productData;
-      const requestedTags = toLowerCaseArrayValues(updatePayload.categories);
-      delete updatePayload.categories;
+      const requestedTags = toLowerCaseArrayValues(updatePayload.tags);
 
-      const existedTags = await Category.findAll({
-        where: {
-          name: {
-            [Op.in]: requestedTags,
-          },
-        },
-        attributes: ['id', 'name'],
+      const existedTags = await Tag.findAll({
+        where: {},
+        attributes: ['name'],
+        raw: true,
       });
-      await handleTags(existedTags, requestedTags, id);
+      updatePayload.tags = await handleTags(existedTags, requestedTags);
       await Product.update(updatePayload, {
         where: { id },
       });
@@ -216,29 +157,10 @@ const updateProduct = async (req, res, next) => {
     result = await Product.findAll({
       where: {
         id,
-        visibility: true,
       },
-      include: [
-        {
-          model: Tag,
-          attributes: ['name'],
-          through: {
-            attributes: [],
-          },
-        },
-      ],
       raw: true,
-      nest: true,
     });
-    result = result.map((row) => {
-      const _id = row.id;
-      delete row.id;
-      return {
-        _id,
-        ...row,
-      };
-    });
-    result = groupProductsById(result);
+    result = formatResult(result);
     return res.status(OK).json({
       success: true,
       message: 'Product updated successfully',

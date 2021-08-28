@@ -1,5 +1,4 @@
 const Joi = require('@hapi/joi');
-const { objectId } = require('../../../common/validation/custom.validations');
 
 module.exports = {
   getAllBlogsSchema: {

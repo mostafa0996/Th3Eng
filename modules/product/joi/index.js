@@ -31,6 +31,7 @@ module.exports = {
         price: Joi.number().required(),
         version: Joi.string().optional(),
         file: Joi.string(),
+        image: Joi.string(),
       }),
   },
 
@@ -63,6 +64,7 @@ module.exports = {
           price: Joi.number().required(),
           version: Joi.string().optional(),
           file: Joi.string(),
+          image: Joi.string(),
         }),
         visibility: Joi.boolean(),
       })

@@ -12,12 +12,10 @@ const { Op } = require('sequelize');
 const logger = require('../../../common/config/logger');
 const { PAGE_LIMIT } = require('../../../common/constants');
 const ErrorResponse = require('../../../common/utils/errorResponse');
-const { Blog, Category, Image } = require('../../../common/init/db/init-db');
+const { Blog, Category } = require('../../../common/init/db/init-db');
 const {
   handleCategories,
-  groupBlogsById,
   formatSearchQuery,
-  handleImages,
   formatResult,
 } = require('../helpers/utils');
 const toLowerCaseArrayValues = require('../../../common/utils/toLowerCaseArrayValues');
@@ -25,28 +23,29 @@ const toLowerCaseArrayValues = require('../../../common/utils/toLowerCaseArrayVa
 const createBlog = async (req, res, next) => {
   try {
     const payload = req.body;
+    payload.images = payload.images.join();
     const requestedCategories = toLowerCaseArrayValues(payload.categories);
-    delete payload.categories;
-    const createdBlog = await Blog.create(payload);
-    await handleImages(payload.images, createdBlog.id);
     const existedCategories = await Category.findAll({
-      where: {
-        name: {
-          [Op.in]: requestedCategories,
-        },
-      },
-      attributes: ['id', 'name'],
+      where: {},
+      attributes: ['name'],
+      raw: true,
     });
-    await handleCategories(
+    payload.categories = await handleCategories(
       existedCategories,
-      requestedCategories,
-      createdBlog.id
+      requestedCategories
     );
-    createdBlog.dataValues.categories = requestedCategories;
+    const createdBlog = await Blog.create(payload);
+    let result = await Blog.findAll({
+      where: {
+        id: createdBlog.id,
+      },
+      raw: true,
+    });
+    result = formatResult(result);
     return res.status(CREATED).json({
       success: true,
       message: 'Blog created successfully',
-      data: createdBlog,
+      data: result[0],
     });
   } catch (error) {
     logger.error('Error create blog: ', error.message);
@@ -63,34 +62,15 @@ const getAllBlogs = async (req, res, next) => {
     const offset = limit * page - limit;
     delete req.query.page;
 
-    const { formattedQuery, categoryFormattedQuery } = formatSearchQuery(
-      req.query
-    );
+    const { formattedQuery } = formatSearchQuery(req.query, req.user);
     const { rows, count } = await Blog.findAndCountAll({
-      where: { ...formattedQuery, visibility: true },
-      distinct: true,
-      include: [
-        {
-          model: Category,
-          where: categoryFormattedQuery,
-          attributes: ['name'],
-          through: {
-            attributes: [],
-          },
-        },
-        {
-          model: Image,
-          attributes: ['image'],
-        },
-      ],
+      where: formattedQuery,
       raw: true,
-      nest: true,
       limit: parseInt(limit, 10),
       offset: parseInt(offset, 10),
     });
 
-    let blogs = formatResult(rows);
-    blogs = groupBlogsById(blogs);
+    const blogs = formatResult(rows);
     return res.status(OK).json({
       success: true,
       message: 'Blogs loaded successfully',
@@ -113,29 +93,13 @@ const getBlog = async (req, res, next) => {
     let blog = await Blog.findAll({
       where: {
         id,
-        visibility: true,
       },
-      include: [
-        {
-          model: Category,
-          attributes: ['name'],
-          through: {
-            attributes: [],
-          },
-        },
-        {
-          model: Image,
-          attributes: ['image'],
-        },
-      ],
       raw: true,
-      nest: true,
     });
     if (!blog.length) {
       return next(new ErrorResponse('Blog not exist', NOT_FOUND));
     }
     blog = formatResult(blog);
-    blog = groupBlogsById(blog);
 
     return res.status(OK).json({
       success: true,
@@ -171,17 +135,15 @@ const updateBlog = async (req, res, next) => {
       const requestedCategories = toLowerCaseArrayValues(
         updatePayload.categories
       );
-      delete updatePayload.categories;
-
       const existedCategories = await Category.findAll({
-        where: {
-          name: {
-            [Op.in]: requestedCategories,
-          },
-        },
-        attributes: ['id', 'name'],
+        where: {},
+        attributes: ['name'],
+        raw: true,
       });
-      await handleCategories(existedCategories, requestedCategories, id);
+      updatePayload.categories = await handleCategories(
+        existedCategories,
+        requestedCategories
+      );
       await Blog.update(updatePayload, {
         where: { id },
       });
@@ -189,29 +151,10 @@ const updateBlog = async (req, res, next) => {
     result = await Blog.findAll({
       where: {
         id,
-        visibility: true,
       },
-      include: [
-        {
-          model: Category,
-          attributes: ['name'],
-          through: {
-            attributes: [],
-          },
-        },
-      ],
       raw: true,
-      nest: true,
     });
-    result = result.map((row) => {
-      const _id = row.id;
-      delete row.id;
-      return {
-        _id,
-        ...row,
-      };
-    });
-    result = groupBlogsById(result);
+    result = formatResult(result);
     return res.status(OK).json({
       success: true,
       message: 'Blog updated successfully',

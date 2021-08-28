@@ -1,17 +1,13 @@
 const { INTERNAL_SERVER_ERROR } = require('http-status-codes');
 const _ = require('lodash');
-const { Category, Image } = require('../../../common/init/db/init-db');
+const { Category } = require('../../../common/init/db/init-db');
 const ErrorResponse = require('../../../common/utils/errorResponse');
 const { Op } = require('sequelize');
+const { roles } = require('../../../common/enum/roles');
 
 class Utils {
-  static handleCategories = async (
-    existedCategories,
-    requestedCategories,
-    blogId
-  ) => {
+  static handleCategories = async (existedCategories, requestedCategories) => {
     try {
-      //get all categoriesName
       const existedCategoriesNames = existedCategories.map((ele) => ele.name);
 
       //convert categories to lowercase
@@ -25,26 +21,22 @@ class Utils {
       notExistedCategories = notExistedCategories.map((ele) => ({ name: ele }));
 
       if (notExistedCategories) {
-        notExistedCategories.forEach(async (ele) => {
-          const category = await Category.create(ele);
-          category.addBlog(blogId, category.id);
-        });
-      }
-      if (existedCategories) {
-        existedCategories.forEach(async (cat) => {
-          await cat.addBlog(blogId, cat.id);
-        });
+        await Category.bulkCreate(notExistedCategories);
       }
 
-      return requestedCategories;
+      return requestedCategories.join(',');
     } catch (error) {
       throw new ErrorResponse(error.message, INTERNAL_SERVER_ERROR);
     }
   };
 
-  static formatSearchQuery = (query) => {
+  static formatSearchQuery = (query, user) => {
     const formattedQuery = {};
-    const categoryFormattedQuery = {};
+
+    if (user && user.role == roles.CUSTOMER) {
+      formattedQuery.visibility = true;
+    }
+
     if (query.text && query.text != '') {
       formattedQuery[Op.or] = [
         {
@@ -53,57 +45,31 @@ class Utils {
         {
           description: { [Op.like]: `%${query.text}%` },
         },
+        {
+          categories: { [Op.like]: `%${query.text}%` },
+        },
       ];
     }
 
     if (query.categories) {
-      const categories = query.categories.split(',');
-      categoryFormattedQuery.name = { [Op.in]: categories };
+      formattedQuery.categories = { [Op.like]: `%${query.categories.replace(/ /g,"")}%` };
     }
 
-    return { formattedQuery, categoryFormattedQuery };
-  };
-
-  static groupBlogsById = (blogs) => {
-    const result = [];
-    const dictionary = {};
-    blogs.forEach((blog) => {
-      dictionary[blog._id] = [];
-    });
-    blogs.forEach((blog) => {
-      dictionary[blog._id].push(blog.categories.name);
-    });
-    Object.keys(dictionary).forEach((ele) => {
-      blogs.forEach((blog) => {
-        if (blog._id == ele) {
-          result.push({ ...blog, categories: dictionary[ele] });
-        }
-      });
-    });
-    return result.filter(
-      (v, i, a) => a.findIndex((t) => t._id === v._id) === i
-    );
-  };
-
-  static handleImages = async (images, blogId) => {
-    images.forEach(async (image) => {
-      const payload = {
-        image,
-        blogId,
-      };
-      await Image.create(payload);
-    });
+    return { formattedQuery };
   };
 
   static formatResult = (blogs) =>
     blogs.map((row) => {
       const _id = row.id;
-      const images = Object.values(row.images);
-      delete row.images;
+      const images = row.images.split(',');
+      const categories = row.categories.split(',');
       delete row.id;
+      delete row.images;
+      delete row.categories;
       return {
         _id,
         images,
+        categories,
         ...row,
       };
     });

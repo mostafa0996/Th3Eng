@@ -15,6 +15,11 @@ config.username = process.env.SQL_DB_USER_NAME || 'root';
 config.password = process.env.SQL_DB_USER_PASSWORD || '12345678';
 config.database = process.env.SQL_DB_NAME || 'local-eng';
 config.host = process.env.SQL_DB_HOST || '127.0.0.1';
+// config.define = {
+//   charset: 'utf8',
+//   collate: 'utf8_unicode_ci',
+// };
+
 if (process.env.NODE_ENV == 'development') {
   config.dialect = 'sqlite';
   config.storage = ':memory:';

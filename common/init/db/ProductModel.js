@@ -42,18 +42,19 @@ module.exports = (sequelize, DataType) => {
       type: DataType.BOOLEAN,
       defaultValue: true,
     },
+    screenshots: {
+      type: DataType.TEXT('long'),
+      allowNull: false,
+    },
+    tags: {
+      type: DataType.TEXT('long'),
+      allowNull: false,
+    },
+    image: {
+      type: DataType.TEXT('long'),
+      allowNull: false,
+    },
   });
-
-  Product.associate = (models) => {
-    Product.belongsToMany(models.tags, {
-      through: 'product_tag',
-      foreignKey: 'productId',
-      otherKey: 'tagId',
-    });
-    Product.hasMany(models.screenshots, {
-      foreignKey: 'productId',
-    });
-  };
 
   return Product;
 };

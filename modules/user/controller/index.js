@@ -369,7 +369,7 @@ const sendHireDeveloperEmail = async (req, res, next) => {
     }
     const email = user.email;
     const { description } = req.body;
-    EmailService.sendHireDeveloperEmail(email, description);
+    EmailService.sendHireDeveloperEmail(email, description, user);
     return res.status(OK).json({
       success: true,
       message: 'Email sent successfully',

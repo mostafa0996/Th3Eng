@@ -12,13 +12,5 @@ module.exports = (sequelize, DataType) => {
     },
   });
 
-  Category.associate = (models) => {
-    Category.belongsToMany(models.blogs, {
-      through: 'blog_category',
-      foreignKey: 'categoryId',
-      otherKey: 'blogId',
-    });
-  };
-
   return Category;
 };

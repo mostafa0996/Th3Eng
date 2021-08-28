@@ -59,12 +59,18 @@ const sendPasswordResetEmail = async (token, name, email) => {
   return _sendHtmlEmail(email, subject, html);
 };
 
-const sendHireDeveloperEmail = async (fromEmail, body) => {
+const sendHireDeveloperEmail = async (fromEmail, body, user) => {
+  const { firstName, lastName, country } = user;
   const subject = 'Hire a developer request';
-  const text = `Thi request is from ${fromEmail}.
+  const text = `
+  First Name: ${firstName},
+  Last Name: ${lastName},
+  Country: ${country},
+  Email: ${fromEmail},
+  Message: 
   ${body}
   `;
-  return _sendEmail('eng.ahmedfarag.a+1@gmail.com', subject, text);
+  return _sendEmail('hire@th3eng.com', subject, text);
 };
 
 const sendContactUsEmail = async (fromEmail, body, firstName, lastName) => {
@@ -72,7 +78,7 @@ const sendContactUsEmail = async (fromEmail, body, firstName, lastName) => {
   const text = `Thi request is from ${fromEmail}.
   ${body}
   `;
-  return _sendEmail('eng.ahmedfarag.a+1@gmail.com', subject, text);
+  return _sendEmail('contact-us@th3eng.com', subject, text);
 };
 
 module.exports = {
