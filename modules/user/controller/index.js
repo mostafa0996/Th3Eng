@@ -95,11 +95,11 @@ const signUp = async (req, res, next) => {
       }
     );
     const verificationTokenExpiration = Date.now() + Math.abs(3600000 * 4);
-    const updatePayload = {
+    const updatedPayload = {
       verificationToken,
       verificationTokenExpiration,
     };
-    await User.update(updatePayload, { where: { id: user.id } });
+    await User.update(updatedPayload, { where: { id: user.id } });
 
     EmailService.sendVerificationEmail(
       verificationToken,
@@ -131,12 +131,12 @@ const verifyUser = async (req, res, next) => {
     if (!user) {
       throw new Error('No valid token found');
     }
-    const updatePayload = {
+    const updatedPayload = {
       verified: true,
       verificationToken: null,
       verificationTokenExpiration: null,
     };
-    await User.update(updatePayload, { where: { id: user.id } });
+    await User.update(updatedPayload, { where: { id: user.id } });
     return res.status(OK).json({
       success: true,
       message: 'User Verified successfully',
@@ -169,11 +169,11 @@ const forgotPassword = async (req, res, next) => {
       }
     );
     const resetPasswordExpiration = Date.now() + Math.abs(3600000 * 4);
-    const updatePayload = {
+    const updatedPayload = {
       resetPasswordToken,
       resetPasswordExpiration,
     };
-    await User.update(updatePayload, { where: { id: user.id } });
+    await User.update(updatedPayload, { where: { id: user.id } });
     EmailService.sendPasswordResetEmail(
       resetPasswordToken,
       user.firstName,
@@ -209,12 +209,12 @@ const resetPassword = async (req, res, next) => {
     }
 
     hashedPassword = await bcrypt.hash(password, salt);
-    const updatePayload = {
+    const updatedPayload = {
       resetPasswordToken: null,
       resetPasswordExpiration: null,
       password: hashedPassword,
     };
-    await User.update(updatePayload, { where: { id: user.id } });
+    await User.update(updatedPayload, { where: { id: user.id } });
     return res.status(OK).json({
       success: true,
       message: 'User Password Reset successfully',
@@ -289,23 +289,23 @@ const updateUser = async (req, res, next) => {
     const userId = req.params.id;
     const loggedInUser = req.user.id;
     const payload = req.body;
-    const updatePayload = { id: userId };
+    const updatedPayload = { id: userId };
     if (userId == loggedInUser) {
-      updatePayload.firstName = payload.firstName;
-      updatePayload.lastName = payload.lastName;
-      updatePayload.phoneNumber = payload.phoneNumber;
-      updatePayload.fullName = `${payload.firstName} ${payload.lastName}`;
+      updatedPayload.firstName = payload.firstName;
+      updatedPayload.lastName = payload.lastName;
+      updatedPayload.phoneNumber = payload.phoneNumber;
+      updatedPayload.fullName = `${payload.firstName} ${payload.lastName}`;
     } else {
-      updatePayload.firstName = payload.firstName;
-      updatePayload.lastName = payload.lastName;
-      updatePayload.fullName = `${payload.firstName} ${payload.lastName}`;
-      updatePayload.phoneNumber = payload.phoneNumber;
-      updatePayload.country = payload.country;
-      updatePayload.verified = payload.verified;
-      updatePayload.role = payload.role;
-      updatePayload.vip = payload.vip;
+      updatedPayload.firstName = payload.firstName;
+      updatedPayload.lastName = payload.lastName;
+      updatedPayload.fullName = `${payload.firstName} ${payload.lastName}`;
+      updatedPayload.phoneNumber = payload.phoneNumber;
+      updatedPayload.country = payload.country;
+      updatedPayload.verified = payload.verified;
+      updatedPayload.role = payload.role;
+      updatedPayload.vip = payload.vip;
     }
-    await User.update(updatePayload, { where: { id: userId } });
+    await User.update(updatedPayload, { where: { id: userId } });
 
     return res.status(OK).json({
       success: true,

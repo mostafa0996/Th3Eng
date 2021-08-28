@@ -131,20 +131,21 @@ const updateBlog = async (req, res, next) => {
       const updatedPayload = { visibility: req.body.visibility };
       await Blog.update(updatedPayload, { where: { id } });
     } else {
-      const updatePayload = req.body.blogData;
+      const updatedPayload = req.body.blogData;
       const requestedCategories = toLowerCaseArrayValues(
-        updatePayload.categories
+        updatedPayload.categories
       );
       const existedCategories = await Category.findAll({
         where: {},
         attributes: ['name'],
         raw: true,
       });
-      updatePayload.categories = await handleCategories(
+      updatedPayload.categories = await handleCategories(
         existedCategories,
         requestedCategories
       );
-      await Blog.update(updatePayload, {
+      updatedPayload.images = updatedPayload.images.join();
+      await Blog.update(updatedPayload, {
         where: { id },
       });
     }

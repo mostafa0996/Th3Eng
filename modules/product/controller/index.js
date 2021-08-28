@@ -141,18 +141,19 @@ const updateProduct = async (req, res, next) => {
       const updatedPayload = { visibility: req.body.visibility };
       await Product.update(updatedPayload, { where: { id } });
     } else {
-      const updatePayload = req.body.productData;
-      const requestedTags = toLowerCaseArrayValues(updatePayload.tags);
+      const updatedPayload = req.body.productData;
+      const requestedTags = toLowerCaseArrayValues(updatedPayload.tags);
 
       const existedTags = await Tag.findAll({
         where: {},
         attributes: ['name'],
         raw: true,
       });
-      updatePayload.tags = await handleTags(existedTags, requestedTags);
-      await Product.update(updatePayload, {
+      updatedPayload.tags = await handleTags(existedTags, requestedTags);
+      await Product.update(updatedPayload, {
         where: { id },
       });
+      updatedPayload.screenshots = updatedPayload.screenshots.join();
     }
     result = await Product.findAll({
       where: {
