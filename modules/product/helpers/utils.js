@@ -28,7 +28,7 @@ class Utils {
     }
   };
 
-  static formatSearchQuery = (query) => {
+  static formatSearchQuery = (query, user) => {
     const formattedQuery = {};
     if (user && user.role == roles.CUSTOMER) {
       formattedQuery.visibility = true;
