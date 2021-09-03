@@ -4,6 +4,7 @@ const { Tag } = require('../../../common/init/db/init-db');
 const ErrorResponse = require('../../../common/utils/errorResponse');
 const { Op } = require('sequelize');
 const { roles } = require('../../../common/enum/roles');
+const generateUniqueId = require('generate-unique-id');
 
 class Utils {
   static handleTags = async (existedTags, requestedTags) => {
@@ -96,6 +97,27 @@ class Utils {
       }),
       value: image,
     }));
+  };
+
+  static handleGetImagesValue = async (rows) => {
+    const result = [];
+    for (const row of rows) {
+      const obj = {
+        ...row,
+      };
+      let screenshots = await Image.findAll({
+        where: {
+          uniqueId: {
+            [Op.in]: row.screenshots.split(','),
+          },
+        },
+        attributes: ['value'],
+        raw: true,
+      });
+      obj.screenshots = screenshots.map((img) => img.value);
+      result.push(obj);
+    }
+    return result;
   };
 }
 

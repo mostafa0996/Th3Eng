@@ -295,6 +295,7 @@ const updateUser = async (req, res, next) => {
       updatedPayload.lastName = payload.lastName;
       updatedPayload.phoneNumber = payload.phoneNumber;
       updatedPayload.fullName = `${payload.firstName} ${payload.lastName}`;
+      updatedPayload.photo = payload.photo;
     } else {
       updatedPayload.firstName = payload.firstName;
       updatedPayload.lastName = payload.lastName;

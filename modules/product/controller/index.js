@@ -12,18 +12,24 @@ const { Op } = require('sequelize');
 const logger = require('../../../common/config/logger');
 const { PAGE_LIMIT } = require('../../../common/constants');
 const ErrorResponse = require('../../../common/utils/errorResponse');
-const { Product, Tag } = require('../../../common/init/db/init-db');
+const {
+  Product,
+  Tag,
+  sequelize,
+  Image,
+} = require('../../../common/init/db/init-db');
 const {
   handleTags,
   formatSearchQuery,
   formatResult,
+  handleImages,
+  handleGetImagesValue,
 } = require('../helpers/utils');
 const toLowerCaseArrayValues = require('../../../common/utils/toLowerCaseArrayValues');
 
 const createProduct = async (req, res, next) => {
   try {
     const payload = req.body;
-    payload.screenshots = payload.screenshots.join();
     const requestedTags = toLowerCaseArrayValues(payload.tags);
     const existedTags = await Tag.findAll({
       where: {},
@@ -31,13 +37,24 @@ const createProduct = async (req, res, next) => {
       raw: true,
     });
     payload.tags = await handleTags(existedTags, requestedTags);
-    const createdProduct = await Product.create(payload);
+
+    const screenshots = await handleImages(payload.screenshots);
+    payload.screenshots = screenshots.map((img) => img.uniqueId).join();
+
+    let createdProduct;
+    await sequelize.transaction(async (t) => {
+      await Image.bulkCreate(screenshots, { transaction: t });
+      createdProduct = await Product.create(payload);
+    });
+
     let result = await Product.findAll({
       where: {
         id: createdProduct.id,
       },
       raw: true,
     });
+
+    result = await handleGetImagesValue(result);
     result = formatResult(result);
     return res.status(CREATED).json({
       success: true,
@@ -67,7 +84,8 @@ const getAllProducts = async (req, res, next) => {
       offset: parseInt(offset, 10),
     });
 
-    const products = formatResult(rows);
+    let products = await handleGetImagesValue(rows);
+    products = formatResult(rows);
     return res.status(OK).json({
       success: true,
       message: 'Products loaded successfully',
@@ -95,7 +113,8 @@ const getProduct = async (req, res, next) => {
     });
     if (!product.length) {
       return next(new ErrorResponse('Product not exist', NOT_FOUND));
-    }
+    };
+    product = await handleGetImagesValue(product);
     product = formatResult(product);
 
     const tags = product[0].tags;
@@ -110,6 +129,7 @@ const getProduct = async (req, res, next) => {
       });
     }
 
+    product[0].relatedProducts = await handleGetImagesValue(product[0].relatedProducts);
     product[0].relatedProducts = formatResult(product[0].relatedProducts);
     return res.status(OK).json({
       success: true,
@@ -150,9 +170,13 @@ const updateProduct = async (req, res, next) => {
         raw: true,
       });
       updatedPayload.tags = await handleTags(existedTags, requestedTags);
-      updatedPayload.screenshots = updatedPayload.screenshots.join();
-      await Product.update(updatedPayload, {
-        where: { id },
+      const screenshots = await handleImages(updatedPayload.screenshots);
+      updatedPayload.screenshots = screenshots.map((img) => img.uniqueId).join();
+      await sequelize.transaction(async (t) => {
+        await Image.bulkCreate(screenshots, { transaction: t });
+        await Product.update(updatedPayload, {
+          where: { id },
+        });
       });
     }
     result = await Product.findAll({
@@ -161,6 +185,7 @@ const updateProduct = async (req, res, next) => {
       },
       raw: true,
     });
+    result = await handleGetImagesValue(result);
     result = formatResult(result);
     return res.status(OK).json({
       success: true,

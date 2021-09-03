@@ -74,7 +74,9 @@ module.exports = (sequelize, DataType) => {
       resetPasswordExpiration: {
         type: DataType.DATE,
       },
-      photo: { type: DataType.STRING, defaultValue: 'no-photo.jpg' },
+      photo: {
+        type: DataType.TEXT('long'),
+      },
       country: {
         type: DataType.STRING,
       },
@@ -99,7 +101,7 @@ module.exports = (sequelize, DataType) => {
             data.password = await bcrypt.hash(data.password, data.salt);
           }
         },
-      }
+      },
     }
   );
   return User;
