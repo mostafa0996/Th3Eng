@@ -64,7 +64,9 @@ const login = async (req, res, next) => {
       data: { user, token: data.token },
     });
   } catch (error) {
-    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    const errors = error.errors
+      ? error.errors.map((e) => e.message)
+      : error.message;
     logger.error('Error while login ', errors);
     next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
@@ -111,7 +113,9 @@ const signUp = async (req, res, next) => {
       .status(CREATED)
       .json({ success: true, message: 'User Created', data: user });
   } catch (error) {
-    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    const errors = error.errors
+      ? error.errors.map((e) => e.message)
+      : error.message;
     logger.error('Error while signup ', errors);
     next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
@@ -143,7 +147,9 @@ const verifyUser = async (req, res, next) => {
       data: null,
     });
   } catch (error) {
-    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    const errors = error.errors
+      ? error.errors.map((e) => e.message)
+      : error.message;
     logger.error('Error while verifing user ', errors);
     next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
@@ -185,7 +191,9 @@ const forgotPassword = async (req, res, next) => {
       data: null,
     });
   } catch (error) {
-    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    const errors = error.errors
+      ? error.errors.map((e) => e.message)
+      : error.message;
     logger.error('Error creating reset password token ', errors);
     next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
@@ -221,7 +229,9 @@ const resetPassword = async (req, res, next) => {
       data: null,
     });
   } catch (error) {
-    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    const errors = error.errors
+      ? error.errors.map((e) => e.message)
+      : error.message;
     logger.error('Error resetting user password ', errors);
     next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
@@ -256,7 +266,9 @@ const getAllUsers = async (req, res, next) => {
       data: users,
     });
   } catch (error) {
-    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    const errors = error.errors
+      ? error.errors.map((e) => e.message)
+      : error.message;
     logger.error('Error get all users ', errors);
     next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
@@ -278,7 +290,9 @@ const getUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    const errors = error.errors
+      ? error.errors.map((e) => e.message)
+      : error.message;
     logger.error('Error get user', errors);
     next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
@@ -288,6 +302,7 @@ const updateUser = async (req, res, next) => {
   try {
     const userId = req.params.id;
     const loggedInUser = req.user.id;
+    console.log(loggedInUser);
     const payload = req.body;
     const updatedPayload = { id: userId };
     if (userId == loggedInUser) {
@@ -296,6 +311,7 @@ const updateUser = async (req, res, next) => {
       updatedPayload.phoneNumber = payload.phoneNumber;
       updatedPayload.fullName = `${payload.firstName} ${payload.lastName}`;
       updatedPayload.photo = payload.photo;
+      updatedPayload.country = payload.country;
     } else {
       updatedPayload.firstName = payload.firstName;
       updatedPayload.lastName = payload.lastName;
@@ -307,16 +323,27 @@ const updateUser = async (req, res, next) => {
       updatedPayload.vip = payload.vip;
     }
     await User.update(updatedPayload, { where: { id: userId } });
-
+    const user = await User.findOne({
+      where: { id: userId },
+      raw: true,
+    });
     return res.status(OK).json({
       success: true,
       message: 'Users updated successfully',
       data: user,
     });
   } catch (error) {
-    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    const errors = error.errors
+      ? error.errors.map((e) => e.message)
+      : error.message;
     logger.error('Error update user ', errors);
-    next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
+    next(
+      new ErrorResponse(
+        errors,
+        error.status || INTERNAL_SERVER_ERROR,
+        error.stack
+      )
+    );
   }
 };
 
@@ -332,7 +359,9 @@ const deleteUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    const errors = error.errors
+      ? error.errors.map((e) => e.message)
+      : error.message;
     logger.error('Error delete user ', errors);
     next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
@@ -352,7 +381,9 @@ const exportUsers = async (req, res, next) => {
     );
     return res.status(OK).send(result);
   } catch (error) {
-    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    const errors = error.errors
+      ? error.errors.map((e) => e.message)
+      : error.message;
     logger.error('Error delete user ', errors);
     next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }
@@ -377,7 +408,9 @@ const sendHireDeveloperEmail = async (req, res, next) => {
       data: null,
     });
   } catch (error) {
-    const errors = error.errors ? error.errors.map((e) => e.message) : error.message
+    const errors = error.errors
+      ? error.errors.map((e) => e.message)
+      : error.message;
     logger.error('Error get user', errors);
     next(new ErrorResponse(errors, error.status || INTERNAL_SERVER_ERROR));
   }

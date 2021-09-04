@@ -113,7 +113,6 @@ router.get(
 router.put(
   '/:id',
   isAuthorized(USER_UPDATE_USER),
-  validateRequest(updateUserSchema),
   updateUser
 );
 

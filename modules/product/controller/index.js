@@ -39,7 +39,7 @@ const createProduct = async (req, res, next) => {
     payload.tags = await handleTags(existedTags, requestedTags);
 
     const screenshots = await handleImages(payload.screenshots);
-    payload.screenshots = screenshots.map((img) => img.uniqueId).join();
+    payload.screenshots = screenshots.map((img) => img.uniqueId).join(',');
 
     let createdProduct;
     await sequelize.transaction(async (t) => {
@@ -53,7 +53,6 @@ const createProduct = async (req, res, next) => {
       },
       raw: true,
     });
-
     result = await handleGetImagesValue(result);
     result = formatResult(result);
     return res.status(CREATED).json({
@@ -64,7 +63,7 @@ const createProduct = async (req, res, next) => {
   } catch (error) {
     logger.error('Error create product: ', error.message);
     next(
-      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR)
+      new ErrorResponse(error.message, error.status || INTERNAL_SERVER_ERROR, error.stack)
     );
   }
 };
@@ -125,6 +124,7 @@ const getProduct = async (req, res, next) => {
             [Op.ne]: id,
           },
         },
+        limit: parseInt(3, 10),
         raw: true,
       });
     }
@@ -171,7 +171,7 @@ const updateProduct = async (req, res, next) => {
       });
       updatedPayload.tags = await handleTags(existedTags, requestedTags);
       const screenshots = await handleImages(updatedPayload.screenshots);
-      updatedPayload.screenshots = screenshots.map((img) => img.uniqueId).join();
+      updatedPayload.screenshots = screenshots.map((img) => img.uniqueId).join(',');
       await sequelize.transaction(async (t) => {
         await Image.bulkCreate(screenshots, { transaction: t });
         await Product.update(updatedPayload, {

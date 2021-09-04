@@ -42,7 +42,7 @@ const createBlog = async (req, res, next) => {
     );
 
     const images = await handleImages(payload.images);
-    payload.images = images.map((img) => img.uniqueId).join();
+    payload.images = images.map((img) => img.uniqueId).join(',');
     let createdBlog;
     await sequelize.transaction(async (t) => {
       await Image.bulkCreate(images, { transaction: t });
@@ -165,7 +165,7 @@ const updateBlog = async (req, res, next) => {
         requestedCategories
       );
       const images = await handleImages(updatedPayload.images);
-      updatedPayload.images = images.map((img) => img.uniqueId).join();
+      updatedPayload.images = images.map((img) => img.uniqueId).join(',');
       await sequelize.transaction(async (t) => {
         await Image.bulkCreate(images, { transaction: t });
         await Blog.update(updatedPayload, {

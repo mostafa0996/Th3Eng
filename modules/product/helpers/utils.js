@@ -1,6 +1,6 @@
 const { INTERNAL_SERVER_ERROR } = require('http-status-codes');
 const _ = require('lodash');
-const { Tag } = require('../../../common/init/db/init-db');
+const { Tag, Image } = require('../../../common/init/db/init-db');
 const ErrorResponse = require('../../../common/utils/errorResponse');
 const { Op } = require('sequelize');
 const { roles } = require('../../../common/enum/roles');
@@ -52,7 +52,7 @@ class Utils {
       ];
     }
     if (query.type) {
-      formattedQuery.type = Number(query.type);
+      formattedQuery.type = query.type;
     }
     if (query.minPrice) {
       formattedQuery.price = { [Op.gte]: Number(query.minPrice) };
@@ -76,7 +76,7 @@ class Utils {
   static formatResult = (products) =>
     products.map((row) => {
       const _id = row.id;
-      const screenshots = row.screenshots.split(',');
+      const screenshots = String(row.screenshots).split(',');
       const tags = row.tags.split(',');
       delete row.id;
       delete row.screenshots;
@@ -105,13 +105,13 @@ class Utils {
       const obj = {
         ...row,
       };
-      let screenshots = await Image.findAll({
+      const screenshotsArray = String(row.screenshots).split(',');
+      const screenshots = await Image.findAll({
         where: {
           uniqueId: {
-            [Op.in]: row.screenshots.split(','),
+            [Op.in]: screenshotsArray,
           },
         },
-        attributes: ['value'],
         raw: true,
       });
       obj.screenshots = screenshots.map((img) => img.value);

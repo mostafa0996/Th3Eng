@@ -90,13 +90,13 @@ class Utils {
       const obj = {
         ...row,
       };
-      let images = await Image.findAll({
+      const imagesArray = String(row.images).split(',');
+      const images = await Image.findAll({
         where: {
           uniqueId: {
-            [Op.in]: row.images.split(','),
+            [Op.in]: imagesArray,
           },
         },
-        attributes: ['value'],
         raw: true,
       });
       obj.images = images.map((img) => img.value);
