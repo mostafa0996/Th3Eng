@@ -76,10 +76,8 @@ class Utils {
   static formatResult = (products) =>
     products.map((row) => {
       const _id = row.id;
-      const screenshots = String(row.screenshots).split(',');
       const tags = row.tags.split(',');
       delete row.id;
-      delete row.screenshots;
       delete row.tags;
       return {
         _id,
