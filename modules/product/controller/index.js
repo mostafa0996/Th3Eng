@@ -84,7 +84,7 @@ const getAllProducts = async (req, res, next) => {
     });
 
     let products = await handleGetImagesValue(rows);
-    products = formatResult(rows);
+    products = formatResult(products);
     return res.status(OK).json({
       success: true,
       message: 'Products loaded successfully',

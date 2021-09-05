@@ -88,7 +88,6 @@ const getAllBlogs = async (req, res, next) => {
     });
 
     let blogs = await handleGetImagesValue(rows);
-
     blogs = formatResult(blogs);
     return res.status(OK).json({
       success: true,
