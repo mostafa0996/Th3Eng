@@ -81,7 +81,6 @@ class Utils {
       delete row.tags;
       return {
         _id,
-        screenshots,
         tags,
         ...row,
       };
